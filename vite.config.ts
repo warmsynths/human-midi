@@ -8,16 +8,18 @@ export default defineConfig({
     })
   ],
   build: {
+    outDir: 'docs',
     lib: {
-      entry: 'humanizer-panel.ts',
-      name: 'HumanizerEngine',
-      fileName: 'humanizer-engine'
+      entry: 'human-panel.ts',
+      name: 'HumanEngine',
+      fileName: 'human-engine'
     },
     rollupOptions: {
       external: ['lit', 'lit/decorators.js'],
       output: {
         globals: {
-          lit: 'lit'
+          lit: 'lit',
+          'lit/decorators.js': 'lit.decorators'
         }
       }
     }

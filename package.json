@@ -1,16 +1,16 @@
 {
-  "name": "humanizer-engine",
+  "name": "human-engine",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/humanizer-engine.umd.cjs",
-  "module": "./dist/humanizer-engine.js",
-  "types": "./dist/humanizer-panel.d.ts",
+  "main": "./docs/human-engine.umd.cjs",
+  "module": "./docs/human-engine.js",
+  "types": "./docs/human-panel.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/humanizer-engine.js",
-      "require": "./dist/humanizer-engine.umd.cjs",
-      "types": "./dist/humanizer-panel.d.ts"
+      "import": "./docs/human-engine.js",
+      "require": "./docs/human-engine.umd.cjs",
+      "types": "./docs/human-panel.d.ts"
     }
   },
   "scripts": {

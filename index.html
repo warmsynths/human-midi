@@ -20,5 +20,14 @@
   </head>
   <body>
     <humanizer-panel></humanizer-panel>
+    <script>
+      const panel = document.querySelector('humanizer-panel');
+      panel.addEventListener('humanizer-preview', (e) => {
+        console.log('🎵 humanizer-preview event received:', e.detail);
+      });
+      panel.addEventListener('humanizer-change', (e) => {
+        console.log('⚙️ humanizer-change event received:', e.detail);
+      });
+    </script>
   </body>
 </html>

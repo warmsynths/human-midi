@@ -2,41 +2,41 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 /**
- * Encapsulates the entire state configuration for the HumanizerEngine.
+ * Encapsulates the entire state configuration for the HumanEngine.
  */
-export interface HumanizerState {
+export interface HumanState {
   chordSequence: string;
   spread: number;
   duration: number;
   minVelocity: number;
   maxVelocity: number;
-  humanizeVariance: number;
+  humanVariance: number;
   microTiming: number;
 }
 
 /**
- * <humanizer-panel>
+ * <human-panel>
  * A modular frontend sidebar/modal component that acts as a middleware control panel.
  * It intercepts text-based chord progressions, humanizes their attributes, and passes
  * the parsed data down to a host application's Web MIDI engine.
  * 
- * @fires humanizer-change - Fired whenever an input changes. The event detail contains the full `HumanizerState`.
+ * @fires human-change - Fired whenever an input changes. The event detail contains the full `HumanState`.
  */
-@customElement('humanizer-panel')
-export class HumanizerPanel extends LitElement {
+@customElement('human-panel')
+export class HumanPanel extends LitElement {
   static get styles() {
     return css`
     :host {
       /* Theme Tokens - Host applications can override these CSS custom properties */
-      --hp-bg: var(--humanizer-bg, #18181b);
-      --hp-surface: var(--humanizer-surface, #27272a);
-      --hp-border: var(--humanizer-border, #3f3f46);
-      --hp-text-primary: var(--humanizer-text-primary, #f4f4f5);
-      --hp-text-secondary: var(--humanizer-text-secondary, #a1a1aa);
-      --hp-accent: var(--humanizer-accent, #3b82f6);
-      --hp-accent-hover: var(--humanizer-accent-hover, #60a5fa);
-      --hp-radius: var(--humanizer-radius, 8px);
-      --hp-font-family: var(--humanizer-font, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif);
+      --hp-bg: var(--human-bg, #18181b);
+      --hp-surface: var(--human-surface, #27272a);
+      --hp-border: var(--human-border, #3f3f46);
+      --hp-text-primary: var(--human-text-primary, #f4f4f5);
+      --hp-text-secondary: var(--human-text-secondary, #a1a1aa);
+      --hp-accent: var(--human-accent, #3b82f6);
+      --hp-accent-hover: var(--human-accent-hover, #60a5fa);
+      --hp-radius: var(--human-radius, 8px);
+      --hp-font-family: var(--human-font, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif);
 
       display: block;
       width: 100%;
@@ -60,6 +60,10 @@ export class HumanizerPanel extends LitElement {
       padding: 16px 20px;
       border-bottom: 1px solid var(--hp-border);
       background: var(--hp-surface);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
     }
 
     .panel-header h2 {
@@ -67,6 +71,33 @@ export class HumanizerPanel extends LitElement {
       font-size: 1.125rem;
       font-weight: 600;
       letter-spacing: -0.01em;
+    }
+
+    .info-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--hp-border);
+      color: var(--hp-text-secondary);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      padding: 0;
+      outline: none;
+    }
+    .info-toggle-btn:hover {
+      color: var(--hp-accent);
+      border-color: var(--hp-accent);
+    }
+    .info-toggle-btn.active {
+      background: var(--hp-accent);
+      color: #ffffff;
+      border-color: var(--hp-accent);
     }
 
     .panel-content {
@@ -82,6 +113,15 @@ export class HumanizerPanel extends LitElement {
       gap: 16px;
     }
 
+    .group-header-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--hp-border);
+      padding-bottom: 8px;
+      gap: 12px;
+    }
+
     .group-title {
       font-size: 0.75rem;
       text-transform: uppercase;
@@ -89,8 +129,23 @@ export class HumanizerPanel extends LitElement {
       color: var(--hp-text-secondary);
       font-weight: 700;
       margin: 0;
-      border-bottom: 1px solid var(--hp-border);
-      padding-bottom: 8px;
+    }
+
+    .group-explanation {
+      font-size: 0.7rem;
+      color: var(--hp-text-secondary);
+      opacity: 0.75;
+      font-style: italic;
+      font-weight: normal;
+    }
+
+    .setting-explanation {
+      font-size: 0.72rem;
+      color: var(--hp-text-secondary);
+      opacity: 0.85;
+      line-height: 1.35;
+      margin-top: 4px;
+      padding-left: 2px;
     }
 
     .control-row {
@@ -216,7 +271,6 @@ export class HumanizerPanel extends LitElement {
       transform: scale(0.95);
     }
 
-    /* Button Styling */
     .preview-btn {
       width: 100%;
       background: var(--hp-accent);
@@ -227,7 +281,6 @@ export class HumanizerPanel extends LitElement {
       font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 8px;
       transition: all 0.2s ease-in-out;
       box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
       display: flex;
@@ -254,6 +307,12 @@ export class HumanizerPanel extends LitElement {
     }
   `;
   }
+
+  /**
+   * Custom heading text displayed at the top of the panel.
+   */
+  @property({ type: String })
+  heading = 'Human Engine';
 
   /**
    * The current space-separated text string of chord progressions.
@@ -292,10 +351,10 @@ export class HumanizerPanel extends LitElement {
   maxVelocity = 100;
 
   /**
-   * Humanize variance (0.0 to 1.0)
+   * Humanized variance (0.0 to 1.0)
    */
   @property({ type: Number })
-  humanizeVariance = 0.5;
+  humanVariance = 0.5;
 
   /**
    * Micro-timing variation (0.0 to 1.0)
@@ -304,26 +363,42 @@ export class HumanizerPanel extends LitElement {
   microTiming = 0.2;
 
   /**
-   * Emits the \`humanizer-change\` custom event with the current state configuration.
+   * Whether the debug section is expanded.
+   */
+  @property({ type: Boolean })
+  debugExpanded = true;
+
+  /**
+   * Whether to show explanations under settings and groups.
+   */
+  @property({ type: Boolean })
+  showInfo = false;
+
+  /**
+   * Emits the `human-change` custom event with the current state configuration.
    */
   private emitChange() {
-    const state: HumanizerState = {
+    const state: HumanState = {
       chordSequence: this.chordSequence,
       spread: this.spread,
       duration: this.duration,
       minVelocity: this.minVelocity,
       maxVelocity: this.maxVelocity,
-      humanizeVariance: this.humanizeVariance,
+      humanVariance: this.humanVariance,
       microTiming: this.microTiming,
     };
 
     this.dispatchEvent(
-      new CustomEvent<HumanizerState>('humanizer-change', {
+      new CustomEvent<HumanState>('human-change', {
         detail: state,
         bubbles: true,
         composed: true,
       })
     );
+  }
+
+  private toggleInfo() {
+    this.showInfo = !this.showInfo;
   }
 
   /**
@@ -341,7 +416,7 @@ export class HumanizerPanel extends LitElement {
    * @param e - The input event
    * @param isInt - Whether the value should be parsed as an integer
    */
-  private handleNumberChange(prop: keyof HumanizerState, e: Event, isInt = false) {
+  private handleNumberChange(prop: keyof HumanState, e: Event, isInt = false) {
     const input = e.target as HTMLInputElement;
     const value = isInt ? parseInt(input.value, 10) : parseFloat(input.value);
     
@@ -358,21 +433,21 @@ export class HumanizerPanel extends LitElement {
   }
 
   /**
-   * Emits the \`humanizer-preview\` event to trigger playback in the host application.
+   * Emits the `human-preview` event to trigger playback in the host application.
    */
   private handlePreview() {
-    const state: HumanizerState = {
+    const state: HumanState = {
       chordSequence: this.chordSequence,
       spread: this.spread,
       duration: this.duration,
       minVelocity: this.minVelocity,
       maxVelocity: this.maxVelocity,
-      humanizeVariance: this.humanizeVariance,
+      humanVariance: this.humanVariance,
       microTiming: this.microTiming,
     };
 
     this.dispatchEvent(
-      new CustomEvent<HumanizerState>('humanizer-preview', {
+      new CustomEvent<HumanState>('human-preview', {
         detail: state,
         bubbles: true,
         composed: true,
@@ -380,32 +455,78 @@ export class HumanizerPanel extends LitElement {
     );
   }
 
+  /**
+   * Toggles the collapsed state of the debug section.
+   */
+  private toggleDebug() {
+    this.debugExpanded = !this.debugExpanded;
+  }
+
   render() {
     return html`
       <div class="panel-header">
-        <h2>Humanizer Engine</h2>
+        <h2>${this.heading}</h2>
+        <button 
+          class="info-toggle-btn ${this.showInfo ? 'active' : ''}" 
+          @click=${this.toggleInfo} 
+          title="Toggle explanations"
+          aria-label="Toggle explanations"
+        >
+          ?
+        </button>
       </div>
       <div class="panel-content">
         
-        <!-- Section: Chord Input -->
-        ${!this.hideInput ? html`
+        <!-- Section: Debug -->
         <div class="control-group">
-          <h3 class="group-title">Chord Input</h3>
-          <div class="control-row">
-            <input 
-              type="text" 
-              .value=${this.chordSequence}
-              @input=${this.handleTextChange}
-              placeholder="e.g. Cmaj7 Dm7 G7 Cmaj"
-              aria-label="Chord Sequence"
-            />
+          <div class="group-header-row" @click=${this.toggleDebug} style="cursor: pointer; user-select: none;">
+            <h3 class="group-title" style="display: flex; align-items: center; gap: 8px;">
+              <span>debug</span>
+              ${this.showInfo ? html`
+                <span class="group-explanation" style="text-transform: none; font-weight: normal;">(test tools)</span>
+              ` : ''}
+            </h3>
+            <span style="font-size: 0.65rem; color: var(--hp-text-secondary);">${this.debugExpanded ? '▼' : '▶'}</span>
           </div>
+          
+          ${this.debugExpanded ? html`
+            ${!this.hideInput ? html`
+              <div class="control-row">
+                <input 
+                  type="text" 
+                  .value=${this.chordSequence}
+                  @input=${this.handleTextChange}
+                  placeholder="e.g. Cmaj7 Dm7 G7 Cmaj"
+                  aria-label="Chord Sequence"
+                />
+                ${this.showInfo ? html`
+                  <div class="setting-explanation">Type a space-separated sequence of chords to play and preview.</div>
+                ` : ''}
+              </div>
+            ` : ''}
+            
+            <div class="control-row">
+              <button class="preview-btn" @click=${this.handlePreview} aria-label="Preview Configuration">
+                <svg viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Preview
+              </button>
+              ${this.showInfo ? html`
+                <div class="setting-explanation">Triggers immediate chord playback using your humanized settings.</div>
+              ` : ''}
+            </div>
+          ` : ''}
         </div>
-        ` : ''}
 
         <!-- Section: Chord Gen Group -->
         <div class="control-group">
-          <h3 class="group-title">Chord Gen Group</h3>
+          <div class="group-header-row">
+            <h3 class="group-title">Chord Gen Group</h3>
+            ${this.showInfo ? html`
+              <span class="group-explanation">(strum & note length)</span>
+            ` : ''}
+          </div>
           
           <!-- Spread -->
           <div class="control-row">
@@ -420,6 +541,9 @@ export class HumanizerPanel extends LitElement {
               @input=${(e: Event) => this.handleNumberChange('spread', e)}
               aria-label="Spread"
             />
+            ${this.showInfo ? html`
+              <div class="setting-explanation">Staggers the start times of notes in the chord for an arpeggiated or strummed feel.</div>
+            ` : ''}
           </div>
 
           <!-- Duration -->
@@ -435,12 +559,20 @@ export class HumanizerPanel extends LitElement {
               @input=${(e: Event) => this.handleNumberChange('duration', e)}
               aria-label="Duration"
             />
+            ${this.showInfo ? html`
+              <div class="setting-explanation">Controls the base length of the notes during playback.</div>
+            ` : ''}
           </div>
         </div>
 
         <!-- Section: Dynamics Group -->
         <div class="control-group">
-          <h3 class="group-title">Dynamics Group</h3>
+          <div class="group-header-row">
+            <h3 class="group-title">Dynamics Group</h3>
+            ${this.showInfo ? html`
+              <span class="group-explanation">(velocity & randomness)</span>
+            ` : ''}
+          </div>
           
           <!-- Min Velocity -->
           <div class="control-row">
@@ -455,6 +587,9 @@ export class HumanizerPanel extends LitElement {
               @input=${(e: Event) => this.handleNumberChange('minVelocity', e, true)}
               aria-label="Min Velocity"
             />
+            ${this.showInfo ? html`
+              <div class="setting-explanation">The minimum MIDI velocity (volume) for chord notes.</div>
+            ` : ''}
           </div>
 
           <!-- Max Velocity -->
@@ -470,27 +605,38 @@ export class HumanizerPanel extends LitElement {
               @input=${(e: Event) => this.handleNumberChange('maxVelocity', e, true)}
               aria-label="Max Velocity"
             />
+            ${this.showInfo ? html`
+              <div class="setting-explanation">The maximum MIDI velocity (volume) for chord notes.</div>
+            ` : ''}
           </div>
 
-          <!-- Humanize Variance -->
+          <!-- Human Variance -->
           <div class="control-row">
             <div class="control-header">
-              <label class="control-label">Humanize Variance</label>
-              <span class="control-value">${this.humanizeVariance.toFixed(2)}</span>
+              <label class="control-label">Human Variance</label>
+              <span class="control-value">${this.humanVariance.toFixed(2)}</span>
             </div>
             <input 
               type="range" 
               min="0" max="1" step="0.01" 
-              .value=${this.humanizeVariance.toString()}
-              @input=${(e: Event) => this.handleNumberChange('humanizeVariance', e)}
-              aria-label="Humanize Variance"
+              .value=${this.humanVariance.toString()}
+              @input=${(e: Event) => this.handleNumberChange('humanVariance', e)}
+              aria-label="Human Variance"
             />
+            ${this.showInfo ? html`
+              <div class="setting-explanation">Adds subtle random velocity and duration deviations.</div>
+            ` : ''}
           </div>
         </div>
 
         <!-- Section: Timing Grid Group -->
         <div class="control-group">
-          <h3 class="group-title">Timing Grid Group</h3>
+          <div class="group-header-row">
+            <h3 class="group-title">Timing Grid Group</h3>
+            ${this.showInfo ? html`
+              <span class="group-explanation">(onset timing offsets)</span>
+            ` : ''}
+          </div>
           
           <!-- Micro-timing / Variation -->
           <div class="control-row">
@@ -505,15 +651,11 @@ export class HumanizerPanel extends LitElement {
               @input=${(e: Event) => this.handleNumberChange('microTiming', e)}
               aria-label="Micro-timing Variation"
             />
+            ${this.showInfo ? html`
+              <div class="setting-explanation">Shifts note onset times slightly early or late for human feel.</div>
+            ` : ''}
           </div>
         </div>
-
-        <button class="preview-btn" @click=${this.handlePreview} aria-label="Preview Configuration">
-          <svg viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-          Preview
-        </button>
 
       </div>
     `;
@@ -522,11 +664,11 @@ export class HumanizerPanel extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'humanizer-panel': HumanizerPanel;
+    'human-panel': HumanPanel;
   }
 
   interface HTMLElementEventMap {
-    'humanizer-change': CustomEvent<HumanizerState>;
-    'humanizer-preview': CustomEvent<HumanizerState>;
+    'human-change': CustomEvent<HumanState>;
+    'human-preview': CustomEvent<HumanState>;
   }
 }
