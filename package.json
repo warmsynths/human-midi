@@ -3,13 +3,12 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "main": "./docs/human-engine.umd.cjs",
+  "main": "./docs/human-engine.js",
   "module": "./docs/human-engine.js",
   "types": "./docs/human-panel.d.ts",
   "exports": {
     ".": {
       "import": "./docs/human-engine.js",
-      "require": "./docs/human-engine.umd.cjs",
       "types": "./docs/human-panel.d.ts"
     }
   },
