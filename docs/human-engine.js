@@ -559,20 +559,20 @@ function Q(e, t, n, r) {
 //#region human-panel.ts
 var $ = class extends X {
 	constructor(...e) {
-		super(...e), this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .5, this.duration = 1, this.minVelocity = 64, this.maxVelocity = 100, this.humanVariance = .5, this.microTiming = .2, this.debugExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
+		super(...e), this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.debugExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
 	}
 	static get styles() {
 		return o`
     :host {
       /* Theme Tokens - Host applications can override these CSS custom properties */
-      --hp-bg: var(--human-bg, #18181b);
-      --hp-surface: var(--human-surface, #27272a);
-      --hp-border: var(--human-border, #3f3f46);
-      --hp-text-primary: var(--human-text-primary, #f4f4f5);
-      --hp-text-secondary: var(--human-text-secondary, #a1a1aa);
-      --hp-accent: var(--human-accent, #3b82f6);
-      --hp-accent-hover: var(--human-accent-hover, #60a5fa);
-      --hp-radius: var(--human-radius, 8px);
+      --hp-bg: var(--human-bg, #1a1a24);
+      --hp-surface: var(--human-surface, #242530);
+      --hp-border: var(--human-border, #3b3c4f);
+      --hp-text-primary: var(--human-text-primary, #f5f5f7);
+      --hp-text-secondary: var(--human-text-secondary, #a3a6be);
+      --hp-accent: var(--human-accent, #ff9f43);
+      --hp-accent-hover: var(--human-accent-hover, #ffb067);
+      --hp-radius: var(--human-radius, 12px);
       --hp-font-family: var(--human-font, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif);
 
       display: block;
@@ -964,13 +964,17 @@ var $ = class extends X {
 	}
 	handleBasicSliderChange(e) {
 		let t = e.target, n = parseFloat(t.value);
-		this.humanSlider = n, this.spread = n, this.humanVariance = n, this.microTiming = n * .5, this.emitChange();
+		this.humanSlider = n, this.spread = parseFloat((n ** 1.2 * 1.5).toFixed(2)), this.humanVariance = parseFloat((n ** 1.1 * 1).toFixed(2)), this.microTiming = parseFloat((n ** 1.5 * 1.5).toFixed(2)), this.emitChange();
 	}
 	setMode(e) {
-		this.mode = e, e === "basic" && (this.humanSlider = (this.spread + this.humanVariance + this.microTiming / .5) / 3, this.humanSlider > 1 && (this.humanSlider = 1), this.humanSlider < 0 && (this.humanSlider = 0)), this.emitChange();
+		if (this.mode = e, e === "basic") {
+			let e = (this.spread / 1.5 + this.humanVariance / 1 + this.microTiming / 1.5) / 3;
+			this.humanSlider = Math.max(0, Math.min(1, e));
+		}
+		this.emitChange();
 	}
 	handleReset() {
-		this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.spread = .5, this.duration = 1, this.minVelocity = 64, this.maxVelocity = 100, this.humanVariance = .5, this.microTiming = .2, this.mode = "advanced", this.humanSlider = .5, this.debugExpanded = !0, this.emitChange();
+		this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.mode = "advanced", this.humanSlider = .5, this.debugExpanded = !0, this.emitChange();
 	}
 	handlePreview() {
 		let e = {
@@ -1115,7 +1119,7 @@ var $ = class extends X {
               </div>
               <input 
                 type="range" 
-                min="0" max="1" step="0.01" 
+                min="0" max="2" step="0.01" 
                 .value=${this.spread.toString()}
                 @input=${(e) => this.handleNumberChange("spread", e)}
                 aria-label="Spread"
@@ -1225,7 +1229,7 @@ var $ = class extends X {
               </div>
               <input 
                 type="range" 
-                min="0" max="1" step="0.01" 
+                min="0" max="2" step="0.01" 
                 .value=${this.microTiming.toString()}
                 @input=${(e) => this.handleNumberChange("microTiming", e)}
                 aria-label="Micro-timing Variation"

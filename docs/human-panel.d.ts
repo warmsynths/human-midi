@@ -34,7 +34,7 @@ export declare class HumanPanel extends LitElement {
      */
     hideInput: boolean;
     /**
-     * Spread value (0.0 to 1.0)
+     * Spread value (0.0 to 2.0)
      */
     spread: number;
     /**
@@ -54,7 +54,7 @@ export declare class HumanPanel extends LitElement {
      */
     humanVariance: number;
     /**
-     * Micro-timing variation (0.0 to 1.0)
+     * Micro-timing variation (0.0 to 2.0)
      */
     microTiming: number;
     /**

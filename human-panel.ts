@@ -28,14 +28,14 @@ export class HumanPanel extends LitElement {
     return css`
     :host {
       /* Theme Tokens - Host applications can override these CSS custom properties */
-      --hp-bg: var(--human-bg, #18181b);
-      --hp-surface: var(--human-surface, #27272a);
-      --hp-border: var(--human-border, #3f3f46);
-      --hp-text-primary: var(--human-text-primary, #f4f4f5);
-      --hp-text-secondary: var(--human-text-secondary, #a1a1aa);
-      --hp-accent: var(--human-accent, #3b82f6);
-      --hp-accent-hover: var(--human-accent-hover, #60a5fa);
-      --hp-radius: var(--human-radius, 8px);
+      --hp-bg: var(--human-bg, #1a1a24);
+      --hp-surface: var(--human-surface, #242530);
+      --hp-border: var(--human-border, #3b3c4f);
+      --hp-text-primary: var(--human-text-primary, #f5f5f7);
+      --hp-text-secondary: var(--human-text-secondary, #a3a6be);
+      --hp-accent: var(--human-accent, #ff9f43);
+      --hp-accent-hover: var(--human-accent-hover, #ffb067);
+      --hp-radius: var(--human-radius, 12px);
       --hp-font-family: var(--human-font, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif);
 
       display: block;
@@ -384,10 +384,10 @@ export class HumanPanel extends LitElement {
   hideInput = false;
 
   /**
-   * Spread value (0.0 to 1.0)
+   * Spread value (0.0 to 2.0)
    */
   @property({ type: Number })
-  spread = 0.5;
+  spread = 0.6;
 
   /**
    * Duration value (0.1 to 2.0)
@@ -399,25 +399,25 @@ export class HumanPanel extends LitElement {
    * Minimum velocity (0 to 127)
    */
   @property({ type: Number })
-  minVelocity = 64;
+  minVelocity = 60;
 
   /**
    * Maximum velocity (0 to 127)
    */
   @property({ type: Number })
-  maxVelocity = 100;
+  maxVelocity = 110;
 
   /**
    * Humanized variance (0.0 to 1.0)
    */
   @property({ type: Number })
-  humanVariance = 0.5;
+  humanVariance = 0.6;
 
   /**
-   * Micro-timing variation (0.0 to 1.0)
+   * Micro-timing variation (0.0 to 2.0)
    */
   @property({ type: Number })
-  microTiming = 0.2;
+  microTiming = 0.3;
 
   /**
    * Whether the debug section is expanded.
@@ -554,10 +554,10 @@ export class HumanPanel extends LitElement {
     const value = parseFloat(input.value);
     this.humanSlider = value;
     
-    // Auto-increase human elements
-    this.spread = value;
-    this.humanVariance = value;
-    this.microTiming = value * 0.5;
+    // Scale features non-linearly to provide a much more expressive and noticeable human feel at higher values
+    this.spread = parseFloat((Math.pow(value, 1.2) * 1.5).toFixed(2));
+    this.humanVariance = parseFloat((Math.pow(value, 1.1) * 1.0).toFixed(2));
+    this.microTiming = parseFloat((Math.pow(value, 1.5) * 1.5).toFixed(2));
 
     this.emitChange();
   }
@@ -565,22 +565,21 @@ export class HumanPanel extends LitElement {
   private setMode(mode: 'basic' | 'advanced') {
     this.mode = mode;
     if (mode === 'basic') {
-      // Sync the basic slider with the average of current advanced settings
-      this.humanSlider = (this.spread + this.humanVariance + (this.microTiming / 0.5)) / 3;
-      if (this.humanSlider > 1) this.humanSlider = 1;
-      if (this.humanSlider < 0) this.humanSlider = 0;
+      // Sync the basic slider with the average of current advanced settings scaled down
+      const avg = (this.spread / 1.5 + this.humanVariance / 1.0 + this.microTiming / 1.5) / 3;
+      this.humanSlider = Math.max(0, Math.min(1, avg));
     }
     this.emitChange();
   }
 
   private handleReset() {
     this.chordSequence = 'Cmaj7 Dm7 G7 Cmaj';
-    this.spread = 0.5;
+    this.spread = 0.6;
     this.duration = 1.0;
-    this.minVelocity = 64;
-    this.maxVelocity = 100;
-    this.humanVariance = 0.5;
-    this.microTiming = 0.2;
+    this.minVelocity = 60;
+    this.maxVelocity = 110;
+    this.humanVariance = 0.6;
+    this.microTiming = 0.3;
     this.mode = 'advanced';
     this.humanSlider = 0.5;
     this.debugExpanded = true;
@@ -743,7 +742,7 @@ export class HumanPanel extends LitElement {
               </div>
               <input 
                 type="range" 
-                min="0" max="1" step="0.01" 
+                min="0" max="2" step="0.01" 
                 .value=${this.spread.toString()}
                 @input=${(e: Event) => this.handleNumberChange('spread', e)}
                 aria-label="Spread"
@@ -853,7 +852,7 @@ export class HumanPanel extends LitElement {
               </div>
               <input 
                 type="range" 
-                min="0" max="1" step="0.01" 
+                min="0" max="2" step="0.01" 
                 .value=${this.microTiming.toString()}
                 @input=${(e: Event) => this.handleNumberChange('microTiming', e)}
                 aria-label="Micro-timing Variation"
