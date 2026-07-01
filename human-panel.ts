@@ -183,6 +183,18 @@ export class HumanPanel extends LitElement {
       gap: 12px;
     }
 
+    .group-header-row.collapsible {
+      cursor: pointer;
+      user-select: none;
+      border-radius: 4px;
+      margin-bottom: -4px;
+      transition: background 0.15s;
+    }
+
+    .group-header-row.collapsible:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
     .group-title {
       font-size: 0.75rem;
       text-transform: uppercase;
@@ -198,6 +210,35 @@ export class HumanPanel extends LitElement {
       opacity: 0.75;
       font-style: italic;
       font-weight: normal;
+    }
+
+    .collapse-chevron {
+      margin-left: auto;
+      color: var(--hp-text-secondary);
+      opacity: 0.6;
+      transition: transform 0.2s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .collapse-chevron.open {
+      transform: rotate(0deg);
+    }
+
+    .collapse-chevron.closed {
+      transform: rotate(-90deg);
+    }
+
+    .collapsible-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+      transition: opacity 0.2s ease;
+    }
+
+    .collapsible-body.hidden {
+      display: none;
     }
 
     .setting-explanation {
@@ -498,6 +539,12 @@ export class HumanPanel extends LitElement {
    */
   @property({ type: Boolean })
   debugExpanded = true;
+
+  /**
+   * Whether the Arpeggiator section is expanded.
+   */
+  @property({ type: Boolean })
+  arpExpanded = true;
 
   /**
    * Whether to show explanations under settings and groups.
@@ -983,101 +1030,115 @@ export class HumanPanel extends LitElement {
 
           <!-- Section: Arpeggiator Group -->
           <div class="control-group">
-            <div class="group-header-row">
+            <div
+              class="group-header-row collapsible"
+              @click=${() => { this.arpExpanded = !this.arpExpanded; }}
+              aria-expanded=${this.arpExpanded}
+              role="button"
+              tabindex="0"
+              @keydown=${(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.arpExpanded = !this.arpExpanded; } }}
+            >
               <h3 class="group-title">Arpeggiator</h3>
               ${this.showInfo ? html`
                 <span class="group-explanation">(arp engine & tempo)</span>
               ` : ''}
+              <span class="collapse-chevron ${this.arpExpanded ? 'open' : 'closed'}">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
             </div>
 
-            <!-- BPM -->
-            <div class="control-row">
-              <div class="control-header">
-                <label class="control-label">Tempo (BPM)</label>
-                <span class="control-value">${this.bpm} BPM</span>
+            <div class="collapsible-body ${this.arpExpanded ? '' : 'hidden'}">
+              <!-- BPM -->
+              <div class="control-row">
+                <div class="control-header">
+                  <label class="control-label">Tempo (BPM)</label>
+                  <span class="control-value">${this.bpm} BPM</span>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                  <input 
+                    type="range" 
+                    min="40" max="240" step="1" 
+                    .value=${this.bpm.toString()}
+                    @input=${this.handleBpmChange}
+                    aria-label="BPM Slider"
+                    style="flex: 1;"
+                  />
+                  <input 
+                    type="number" 
+                    min="40" max="240" 
+                    .value=${this.bpm.toString()}
+                    @input=${this.handleBpmChange}
+                    aria-label="BPM Input"
+                    style="width: 70px; background: var(--hp-surface); border: 1px solid var(--hp-border); color: var(--hp-text-primary); padding: 8px 10px; border-radius: 6px; font-family: inherit; font-size: 0.875rem;"
+                  />
+                </div>
+                ${this.showInfo ? html`
+                  <div class="setting-explanation">Controls the global tempo of the project in Beats Per Minute.</div>
+                ` : ''}
               </div>
-              <div style="display: flex; gap: 12px; align-items: center;">
+
+              <!-- Arp Mode -->
+              <div class="control-row">
+                <div class="control-header">
+                  <label class="control-label">Arp Mode</label>
+                </div>
+                <select 
+                  .value=${this.arpMode}
+                  @change=${this.handleArpModeChange}
+                  aria-label="Arp Mode"
+                >
+                  <option value="off">Off</option>
+                  <option value="up">Up</option>
+                  <option value="down">Down</option>
+                  <option value="up-down">Up-Down</option>
+                  <option value="random">Random</option>
+                </select>
+                ${this.showInfo ? html`
+                  <div class="setting-explanation">Determines the order in which the notes of the chord are played.</div>
+                ` : ''}
+              </div>
+
+              <!-- Arp Rate / Division -->
+              <div class="control-row">
+                <div class="control-header">
+                  <label class="control-label">Arp Rate / Division</label>
+                </div>
+                <select 
+                  .value=${this.arpRate}
+                  @change=${this.handleArpRateChange}
+                  ?disabled=${this.arpMode === 'off'}
+                  aria-label="Arp Rate"
+                >
+                  <option value="1/4">1/4</option>
+                  <option value="1/8">1/8</option>
+                  <option value="1/16">1/16</option>
+                  <option value="1/8T">1/8T (Triplet)</option>
+                </select>
+                ${this.showInfo ? html`
+                  <div class="setting-explanation">Rhythmic speed / subdivision division of the arpeggio notes.</div>
+                ` : ''}
+              </div>
+
+              <!-- Octave Range -->
+              <div class="control-row">
+                <div class="control-header">
+                  <label class="control-label">Octave Range</label>
+                  <span class="control-value">${this.arpRange}</span>
+                </div>
                 <input 
                   type="range" 
-                  min="40" max="240" step="1" 
-                  .value=${this.bpm.toString()}
-                  @input=${this.handleBpmChange}
-                  aria-label="BPM Slider"
-                  style="flex: 1;"
+                  min="1" max="4" step="1" 
+                  .value=${this.arpRange.toString()}
+                  @input=${this.handleArpRangeChange}
+                  ?disabled=${this.arpMode === 'off'}
+                  aria-label="Octave Range"
                 />
-                <input 
-                  type="number" 
-                  min="40" max="240" 
-                  .value=${this.bpm.toString()}
-                  @input=${this.handleBpmChange}
-                  aria-label="BPM Input"
-                  style="width: 70px; background: var(--hp-surface); border: 1px solid var(--hp-border); color: var(--hp-text-primary); padding: 8px 10px; border-radius: 6px; font-family: inherit; font-size: 0.875rem;"
-                />
+                ${this.showInfo ? html`
+                  <div class="setting-explanation">The number of octaves the arpeggio pattern repeats across.</div>
+                ` : ''}
               </div>
-              ${this.showInfo ? html`
-                <div class="setting-explanation">Controls the global tempo of the project in Beats Per Minute.</div>
-              ` : ''}
-            </div>
-
-            <!-- Arp Mode -->
-            <div class="control-row">
-              <div class="control-header">
-                <label class="control-label">Arp Mode</label>
-              </div>
-              <select 
-                .value=${this.arpMode}
-                @change=${this.handleArpModeChange}
-                aria-label="Arp Mode"
-              >
-                <option value="off">Off</option>
-                <option value="up">Up</option>
-                <option value="down">Down</option>
-                <option value="up-down">Up-Down</option>
-                <option value="random">Random</option>
-              </select>
-              ${this.showInfo ? html`
-                <div class="setting-explanation">Determines the order in which the notes of the chord are played.</div>
-              ` : ''}
-            </div>
-
-            <!-- Arp Rate / Division -->
-            <div class="control-row">
-              <div class="control-header">
-                <label class="control-label">Arp Rate / Division</label>
-              </div>
-              <select 
-                .value=${this.arpRate}
-                @change=${this.handleArpRateChange}
-                ?disabled=${this.arpMode === 'off'}
-                aria-label="Arp Rate"
-              >
-                <option value="1/4">1/4</option>
-                <option value="1/8">1/8</option>
-                <option value="1/16">1/16</option>
-                <option value="1/8T">1/8T (Triplet)</option>
-              </select>
-              ${this.showInfo ? html`
-                <div class="setting-explanation">Rhythmic speed / subdivision division of the arpeggio notes.</div>
-              ` : ''}
-            </div>
-
-            <!-- Octave Range -->
-            <div class="control-row">
-              <div class="control-header">
-                <label class="control-label">Octave Range</label>
-                <span class="control-value">${this.arpRange}</span>
-              </div>
-              <input 
-                type="range" 
-                min="1" max="4" step="1" 
-                .value=${this.arpRange.toString()}
-                @input=${this.handleArpRangeChange}
-                ?disabled=${this.arpMode === 'off'}
-                aria-label="Octave Range"
-              />
-              ${this.showInfo ? html`
-                <div class="setting-explanation">The number of octaves the arpeggio pattern repeats across.</div>
-              ` : ''}
             </div>
           </div>
         `}

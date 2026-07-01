@@ -82,6 +82,10 @@ export declare class HumanPanel extends LitElement {
      */
     debugExpanded: boolean;
     /**
+     * Whether the Arpeggiator section is expanded.
+     */
+    arpExpanded: boolean;
+    /**
      * Whether to show explanations under settings and groups.
      */
     showInfo: boolean;
