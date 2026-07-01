@@ -10,6 +10,10 @@ export interface HumanState {
     maxVelocity: number;
     humanVariance: number;
     microTiming: number;
+    bpm: number;
+    arpMode: string;
+    arpRate: string;
+    arpRange: number;
 }
 /**
  * <human-panel>
@@ -58,6 +62,22 @@ export declare class HumanPanel extends LitElement {
      */
     microTiming: number;
     /**
+     * Project tempo (BPM).
+     */
+    bpm: number;
+    /**
+     * Arpeggiator mode.
+     */
+    arpMode: string;
+    /**
+     * Arpeggiator rate (rhythmic division).
+     */
+    arpRate: string;
+    /**
+     * Arpeggiator range (octave extension).
+     */
+    arpRange: number;
+    /**
      * Whether the debug section is expanded.
      */
     debugExpanded: boolean;
@@ -95,6 +115,10 @@ export declare class HumanPanel extends LitElement {
     private handleBasicSliderChange;
     private setMode;
     private handleReset;
+    private handleBpmChange;
+    private handleArpModeChange;
+    private handleArpRateChange;
+    private handleArpRangeChange;
     /**
      * Emits the `human-preview` event to trigger playback in the host application.
      */

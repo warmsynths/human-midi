@@ -559,7 +559,7 @@ function Q(e, t, n, r) {
 //#region human-panel.ts
 var $ = class extends X {
 	constructor(...e) {
-		super(...e), this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.debugExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
+		super(...e), this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.bpm = 80, this.arpMode = "off", this.arpRate = "1/16", this.arpRange = 1, this.debugExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
 	}
 	static get styles() {
 		return o`
@@ -794,6 +794,52 @@ var $ = class extends X {
       opacity: 0.6;
     }
 
+    /* Select Dropdown Styling */
+    select {
+      width: 100%;
+      background: var(--hp-surface);
+      border: 1px solid var(--hp-border);
+      color: var(--hp-text-primary);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: all 0.2s ease-in-out;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a6be' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--hp-accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Disabled State styling */
+    select:disabled,
+    input[type="range"]:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    input[type="range"]:disabled::-webkit-slider-thumb {
+      cursor: not-allowed;
+      background: var(--hp-text-secondary);
+      transform: none;
+    }
+
+    input[type="range"]:disabled::-moz-range-thumb {
+      cursor: not-allowed;
+      background: var(--hp-text-secondary);
+      transform: none;
+    }
+
     /* Range Slider Styling */
     input[type="range"] {
       -webkit-appearance: none;
@@ -909,7 +955,7 @@ var $ = class extends X {
 			let e = localStorage.getItem("human-panel-state");
 			if (e) {
 				let t = JSON.parse(e);
-				t.chordSequence !== void 0 && (this.chordSequence = t.chordSequence), t.spread !== void 0 && (this.spread = t.spread), t.duration !== void 0 && (this.duration = t.duration), t.minVelocity !== void 0 && (this.minVelocity = t.minVelocity), t.maxVelocity !== void 0 && (this.maxVelocity = t.maxVelocity), t.humanVariance !== void 0 && (this.humanVariance = t.humanVariance), t.microTiming !== void 0 && (this.microTiming = t.microTiming), t.mode !== void 0 && (this.mode = t.mode), t.humanSlider !== void 0 && (this.humanSlider = t.humanSlider), t.debugExpanded !== void 0 && (this.debugExpanded = t.debugExpanded);
+				t.chordSequence !== void 0 && (this.chordSequence = t.chordSequence), t.spread !== void 0 && (this.spread = t.spread), t.duration !== void 0 && (this.duration = t.duration), t.minVelocity !== void 0 && (this.minVelocity = t.minVelocity), t.maxVelocity !== void 0 && (this.maxVelocity = t.maxVelocity), t.humanVariance !== void 0 && (this.humanVariance = t.humanVariance), t.microTiming !== void 0 && (this.microTiming = t.microTiming), t.bpm !== void 0 && (this.bpm = t.bpm), t.arpMode !== void 0 && (this.arpMode = t.arpMode), t.arpRate !== void 0 && (this.arpRate = t.arpRate), t.arpRange !== void 0 && (this.arpRange = t.arpRange), t.mode !== void 0 && (this.mode = t.mode), t.humanSlider !== void 0 && (this.humanSlider = t.humanSlider), t.debugExpanded !== void 0 && (this.debugExpanded = t.debugExpanded);
 			}
 		} catch (e) {
 			console.error("Error loading state from localStorage:", e);
@@ -925,6 +971,10 @@ var $ = class extends X {
 				maxVelocity: this.maxVelocity,
 				humanVariance: this.humanVariance,
 				microTiming: this.microTiming,
+				bpm: this.bpm,
+				arpMode: this.arpMode,
+				arpRate: this.arpRate,
+				arpRange: this.arpRange,
 				mode: this.mode,
 				humanSlider: this.humanSlider,
 				debugExpanded: this.debugExpanded
@@ -943,7 +993,11 @@ var $ = class extends X {
 			minVelocity: this.minVelocity,
 			maxVelocity: this.maxVelocity,
 			humanVariance: this.humanVariance,
-			microTiming: this.microTiming
+			microTiming: this.microTiming,
+			bpm: this.bpm,
+			arpMode: this.arpMode,
+			arpRate: this.arpRate,
+			arpRange: this.arpRange
 		};
 		this.dispatchEvent(new CustomEvent("human-change", {
 			detail: e,
@@ -974,7 +1028,23 @@ var $ = class extends X {
 		this.emitChange();
 	}
 	handleReset() {
-		this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.mode = "advanced", this.humanSlider = .5, this.debugExpanded = !0, this.emitChange();
+		this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.bpm = 80, this.arpMode = "off", this.arpRate = "1/16", this.arpRange = 1, this.mode = "advanced", this.humanSlider = .5, this.debugExpanded = !0, this.emitChange();
+	}
+	handleBpmChange(e) {
+		let t = e.target;
+		this.bpm = Math.max(40, Math.min(240, parseInt(t.value, 10) || 80)), this.emitChange();
+	}
+	handleArpModeChange(e) {
+		let t = e.target;
+		this.arpMode = t.value, this.emitChange();
+	}
+	handleArpRateChange(e) {
+		let t = e.target;
+		this.arpRate = t.value, this.emitChange();
+	}
+	handleArpRangeChange(e) {
+		let t = e.target;
+		this.arpRange = parseInt(t.value, 10), this.emitChange();
 	}
 	handlePreview() {
 		let e = {
@@ -984,7 +1054,11 @@ var $ = class extends X {
 			minVelocity: this.minVelocity,
 			maxVelocity: this.maxVelocity,
 			humanVariance: this.humanVariance,
-			microTiming: this.microTiming
+			microTiming: this.microTiming,
+			bpm: this.bpm,
+			arpMode: this.arpMode,
+			arpRate: this.arpRate,
+			arpRange: this.arpRange
 		};
 		this.dispatchEvent(new CustomEvent("human-preview", {
 			detail: e,
@@ -1239,6 +1313,106 @@ var $ = class extends X {
               ` : ""}
             </div>
           </div>
+
+          <!-- Section: Arpeggiator Group -->
+          <div class="control-group">
+            <div class="group-header-row">
+              <h3 class="group-title">Arpeggiator</h3>
+              ${this.showInfo ? R`
+                <span class="group-explanation">(arp engine & tempo)</span>
+              ` : ""}
+            </div>
+
+            <!-- BPM -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Tempo (BPM)</label>
+                <span class="control-value">${this.bpm} BPM</span>
+              </div>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <input 
+                  type="range" 
+                  min="40" max="240" step="1" 
+                  .value=${this.bpm.toString()}
+                  @input=${this.handleBpmChange}
+                  aria-label="BPM Slider"
+                  style="flex: 1;"
+                />
+                <input 
+                  type="number" 
+                  min="40" max="240" 
+                  .value=${this.bpm.toString()}
+                  @input=${this.handleBpmChange}
+                  aria-label="BPM Input"
+                  style="width: 70px; background: var(--hp-surface); border: 1px solid var(--hp-border); color: var(--hp-text-primary); padding: 8px 10px; border-radius: 6px; font-family: inherit; font-size: 0.875rem;"
+                />
+              </div>
+              ${this.showInfo ? R`
+                <div class="setting-explanation">Controls the global tempo of the project in Beats Per Minute.</div>
+              ` : ""}
+            </div>
+
+            <!-- Arp Mode -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Arp Mode</label>
+              </div>
+              <select 
+                .value=${this.arpMode}
+                @change=${this.handleArpModeChange}
+                aria-label="Arp Mode"
+              >
+                <option value="off">Off</option>
+                <option value="up">Up</option>
+                <option value="down">Down</option>
+                <option value="up-down">Up-Down</option>
+                <option value="random">Random</option>
+              </select>
+              ${this.showInfo ? R`
+                <div class="setting-explanation">Determines the order in which the notes of the chord are played.</div>
+              ` : ""}
+            </div>
+
+            <!-- Arp Rate / Division -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Arp Rate / Division</label>
+              </div>
+              <select 
+                .value=${this.arpRate}
+                @change=${this.handleArpRateChange}
+                ?disabled=${this.arpMode === "off"}
+                aria-label="Arp Rate"
+              >
+                <option value="1/4">1/4</option>
+                <option value="1/8">1/8</option>
+                <option value="1/16">1/16</option>
+                <option value="1/8T">1/8T (Triplet)</option>
+              </select>
+              ${this.showInfo ? R`
+                <div class="setting-explanation">Rhythmic speed / subdivision division of the arpeggio notes.</div>
+              ` : ""}
+            </div>
+
+            <!-- Octave Range -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Octave Range</label>
+                <span class="control-value">${this.arpRange}</span>
+              </div>
+              <input 
+                type="range" 
+                min="1" max="4" step="1" 
+                .value=${this.arpRange.toString()}
+                @input=${this.handleArpRangeChange}
+                ?disabled=${this.arpMode === "off"}
+                aria-label="Octave Range"
+              />
+              ${this.showInfo ? R`
+                <div class="setting-explanation">The number of octaves the arpeggio pattern repeats across.</div>
+              ` : ""}
+            </div>
+          </div>
         `}
       </div>
     `;
@@ -1247,6 +1421,15 @@ var $ = class extends X {
 Q([Z({ type: String })], $.prototype, "heading", void 0), Q([Z({
 	type: String,
 	attribute: "chord-sequence"
-})], $.prototype, "chordSequence", void 0), Q([Z({ type: Boolean })], $.prototype, "hideInput", void 0), Q([Z({ type: Number })], $.prototype, "spread", void 0), Q([Z({ type: Number })], $.prototype, "duration", void 0), Q([Z({ type: Number })], $.prototype, "minVelocity", void 0), Q([Z({ type: Number })], $.prototype, "maxVelocity", void 0), Q([Z({ type: Number })], $.prototype, "humanVariance", void 0), Q([Z({ type: Number })], $.prototype, "microTiming", void 0), Q([Z({ type: Boolean })], $.prototype, "debugExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "showInfo", void 0), Q([Z({ type: String })], $.prototype, "mode", void 0), Q([Z({ type: Number })], $.prototype, "humanSlider", void 0), $ = Q([he("human-panel")], $);
+})], $.prototype, "chordSequence", void 0), Q([Z({ type: Boolean })], $.prototype, "hideInput", void 0), Q([Z({ type: Number })], $.prototype, "spread", void 0), Q([Z({ type: Number })], $.prototype, "duration", void 0), Q([Z({ type: Number })], $.prototype, "minVelocity", void 0), Q([Z({ type: Number })], $.prototype, "maxVelocity", void 0), Q([Z({ type: Number })], $.prototype, "humanVariance", void 0), Q([Z({ type: Number })], $.prototype, "microTiming", void 0), Q([Z({ type: Number })], $.prototype, "bpm", void 0), Q([Z({
+	type: String,
+	attribute: "arp-mode"
+})], $.prototype, "arpMode", void 0), Q([Z({
+	type: String,
+	attribute: "arp-rate"
+})], $.prototype, "arpRate", void 0), Q([Z({
+	type: Number,
+	attribute: "arp-range"
+})], $.prototype, "arpRange", void 0), Q([Z({ type: Boolean })], $.prototype, "debugExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "showInfo", void 0), Q([Z({ type: String })], $.prototype, "mode", void 0), Q([Z({ type: Number })], $.prototype, "humanSlider", void 0), $ = Q([he("human-panel")], $);
 //#endregion
 export { $ as HumanPanel };

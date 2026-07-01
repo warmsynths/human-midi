@@ -12,6 +12,10 @@ export interface HumanState {
   maxVelocity: number;
   humanVariance: number;
   microTiming: number;
+  bpm: number;
+  arpMode: string;
+  arpRate: string;
+  arpRange: number;
 }
 
 /**
@@ -257,6 +261,52 @@ export class HumanPanel extends LitElement {
       opacity: 0.6;
     }
 
+    /* Select Dropdown Styling */
+    select {
+      width: 100%;
+      background: var(--hp-surface);
+      border: 1px solid var(--hp-border);
+      color: var(--hp-text-primary);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: all 0.2s ease-in-out;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a6be' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--hp-accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Disabled State styling */
+    select:disabled,
+    input[type="range"]:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    input[type="range"]:disabled::-webkit-slider-thumb {
+      cursor: not-allowed;
+      background: var(--hp-text-secondary);
+      transform: none;
+    }
+
+    input[type="range"]:disabled::-moz-range-thumb {
+      cursor: not-allowed;
+      background: var(--hp-text-secondary);
+      transform: none;
+    }
+
     /* Range Slider Styling */
     input[type="range"] {
       -webkit-appearance: none;
@@ -420,6 +470,30 @@ export class HumanPanel extends LitElement {
   microTiming = 0.3;
 
   /**
+   * Project tempo (BPM).
+   */
+  @property({ type: Number })
+  bpm = 80;
+
+  /**
+   * Arpeggiator mode.
+   */
+  @property({ type: String, attribute: 'arp-mode' })
+  arpMode = 'off';
+
+  /**
+   * Arpeggiator rate (rhythmic division).
+   */
+  @property({ type: String, attribute: 'arp-rate' })
+  arpRate = '1/16';
+
+  /**
+   * Arpeggiator range (octave extension).
+   */
+  @property({ type: Number, attribute: 'arp-range' })
+  arpRange = 1;
+
+  /**
    * Whether the debug section is expanded.
    */
   @property({ type: Boolean })
@@ -460,6 +534,10 @@ export class HumanPanel extends LitElement {
         if (state.maxVelocity !== undefined) this.maxVelocity = state.maxVelocity;
         if (state.humanVariance !== undefined) this.humanVariance = state.humanVariance;
         if (state.microTiming !== undefined) this.microTiming = state.microTiming;
+        if (state.bpm !== undefined) this.bpm = state.bpm;
+        if (state.arpMode !== undefined) this.arpMode = state.arpMode;
+        if (state.arpRate !== undefined) this.arpRate = state.arpRate;
+        if (state.arpRange !== undefined) this.arpRange = state.arpRange;
         if (state.mode !== undefined) this.mode = state.mode;
         if (state.humanSlider !== undefined) this.humanSlider = state.humanSlider;
         if (state.debugExpanded !== undefined) this.debugExpanded = state.debugExpanded;
@@ -479,6 +557,10 @@ export class HumanPanel extends LitElement {
         maxVelocity: this.maxVelocity,
         humanVariance: this.humanVariance,
         microTiming: this.microTiming,
+        bpm: this.bpm,
+        arpMode: this.arpMode,
+        arpRate: this.arpRate,
+        arpRange: this.arpRange,
         mode: this.mode,
         humanSlider: this.humanSlider,
         debugExpanded: this.debugExpanded,
@@ -503,6 +585,10 @@ export class HumanPanel extends LitElement {
       maxVelocity: this.maxVelocity,
       humanVariance: this.humanVariance,
       microTiming: this.microTiming,
+      bpm: this.bpm,
+      arpMode: this.arpMode,
+      arpRate: this.arpRate,
+      arpRange: this.arpRange,
     };
 
     this.dispatchEvent(
@@ -580,10 +666,38 @@ export class HumanPanel extends LitElement {
     this.maxVelocity = 110;
     this.humanVariance = 0.6;
     this.microTiming = 0.3;
+    this.bpm = 80;
+    this.arpMode = 'off';
+    this.arpRate = '1/16';
+    this.arpRange = 1;
     this.mode = 'advanced';
     this.humanSlider = 0.5;
     this.debugExpanded = true;
 
+    this.emitChange();
+  }
+
+  private handleBpmChange(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.bpm = Math.max(40, Math.min(240, parseInt(input.value, 10) || 80));
+    this.emitChange();
+  }
+
+  private handleArpModeChange(e: Event) {
+    const select = e.target as HTMLSelectElement;
+    this.arpMode = select.value;
+    this.emitChange();
+  }
+
+  private handleArpRateChange(e: Event) {
+    const select = e.target as HTMLSelectElement;
+    this.arpRate = select.value;
+    this.emitChange();
+  }
+
+  private handleArpRangeChange(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.arpRange = parseInt(input.value, 10);
     this.emitChange();
   }
 
@@ -599,6 +713,10 @@ export class HumanPanel extends LitElement {
       maxVelocity: this.maxVelocity,
       humanVariance: this.humanVariance,
       microTiming: this.microTiming,
+      bpm: this.bpm,
+      arpMode: this.arpMode,
+      arpRate: this.arpRate,
+      arpRange: this.arpRange,
     };
 
     this.dispatchEvent(
@@ -859,6 +977,106 @@ export class HumanPanel extends LitElement {
               />
               ${this.showInfo ? html`
                 <div class="setting-explanation">Shifts note onset times slightly early or late for human feel.</div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Section: Arpeggiator Group -->
+          <div class="control-group">
+            <div class="group-header-row">
+              <h3 class="group-title">Arpeggiator</h3>
+              ${this.showInfo ? html`
+                <span class="group-explanation">(arp engine & tempo)</span>
+              ` : ''}
+            </div>
+
+            <!-- BPM -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Tempo (BPM)</label>
+                <span class="control-value">${this.bpm} BPM</span>
+              </div>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <input 
+                  type="range" 
+                  min="40" max="240" step="1" 
+                  .value=${this.bpm.toString()}
+                  @input=${this.handleBpmChange}
+                  aria-label="BPM Slider"
+                  style="flex: 1;"
+                />
+                <input 
+                  type="number" 
+                  min="40" max="240" 
+                  .value=${this.bpm.toString()}
+                  @input=${this.handleBpmChange}
+                  aria-label="BPM Input"
+                  style="width: 70px; background: var(--hp-surface); border: 1px solid var(--hp-border); color: var(--hp-text-primary); padding: 8px 10px; border-radius: 6px; font-family: inherit; font-size: 0.875rem;"
+                />
+              </div>
+              ${this.showInfo ? html`
+                <div class="setting-explanation">Controls the global tempo of the project in Beats Per Minute.</div>
+              ` : ''}
+            </div>
+
+            <!-- Arp Mode -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Arp Mode</label>
+              </div>
+              <select 
+                .value=${this.arpMode}
+                @change=${this.handleArpModeChange}
+                aria-label="Arp Mode"
+              >
+                <option value="off">Off</option>
+                <option value="up">Up</option>
+                <option value="down">Down</option>
+                <option value="up-down">Up-Down</option>
+                <option value="random">Random</option>
+              </select>
+              ${this.showInfo ? html`
+                <div class="setting-explanation">Determines the order in which the notes of the chord are played.</div>
+              ` : ''}
+            </div>
+
+            <!-- Arp Rate / Division -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Arp Rate / Division</label>
+              </div>
+              <select 
+                .value=${this.arpRate}
+                @change=${this.handleArpRateChange}
+                ?disabled=${this.arpMode === 'off'}
+                aria-label="Arp Rate"
+              >
+                <option value="1/4">1/4</option>
+                <option value="1/8">1/8</option>
+                <option value="1/16">1/16</option>
+                <option value="1/8T">1/8T (Triplet)</option>
+              </select>
+              ${this.showInfo ? html`
+                <div class="setting-explanation">Rhythmic speed / subdivision division of the arpeggio notes.</div>
+              ` : ''}
+            </div>
+
+            <!-- Octave Range -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Octave Range</label>
+                <span class="control-value">${this.arpRange}</span>
+              </div>
+              <input 
+                type="range" 
+                min="1" max="4" step="1" 
+                .value=${this.arpRange.toString()}
+                @input=${this.handleArpRangeChange}
+                ?disabled=${this.arpMode === 'off'}
+                aria-label="Octave Range"
+              />
+              ${this.showInfo ? html`
+                <div class="setting-explanation">The number of octaves the arpeggio pattern repeats across.</div>
               ` : ''}
             </div>
           </div>
