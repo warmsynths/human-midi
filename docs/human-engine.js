@@ -909,7 +909,7 @@ var $ = class extends X {
 			let e = localStorage.getItem("human-panel-state");
 			if (e) {
 				let t = JSON.parse(e);
-				t.chordSequence !== void 0 && (this.chordSequence = t.chordSequence), t.spread !== void 0 && (this.spread = t.spread), t.duration !== void 0 && (this.duration = t.duration), t.minVelocity !== void 0 && (this.minVelocity = t.minVelocity), t.maxVelocity !== void 0 && (this.maxVelocity = t.maxVelocity), t.humanVariance !== void 0 && (this.humanVariance = t.humanVariance), t.microTiming !== void 0 && (this.microTiming = t.microTiming), t.mode !== void 0 && (this.mode = t.mode), t.humanSlider !== void 0 && (this.humanSlider = t.humanSlider);
+				t.chordSequence !== void 0 && (this.chordSequence = t.chordSequence), t.spread !== void 0 && (this.spread = t.spread), t.duration !== void 0 && (this.duration = t.duration), t.minVelocity !== void 0 && (this.minVelocity = t.minVelocity), t.maxVelocity !== void 0 && (this.maxVelocity = t.maxVelocity), t.humanVariance !== void 0 && (this.humanVariance = t.humanVariance), t.microTiming !== void 0 && (this.microTiming = t.microTiming), t.mode !== void 0 && (this.mode = t.mode), t.humanSlider !== void 0 && (this.humanSlider = t.humanSlider), t.debugExpanded !== void 0 && (this.debugExpanded = t.debugExpanded);
 			}
 		} catch (e) {
 			console.error("Error loading state from localStorage:", e);
@@ -926,7 +926,8 @@ var $ = class extends X {
 				humanVariance: this.humanVariance,
 				microTiming: this.microTiming,
 				mode: this.mode,
-				humanSlider: this.humanSlider
+				humanSlider: this.humanSlider,
+				debugExpanded: this.debugExpanded
 			};
 			localStorage.setItem("human-panel-state", JSON.stringify(e));
 		} catch (e) {
@@ -969,7 +970,7 @@ var $ = class extends X {
 		this.mode = e, e === "basic" && (this.humanSlider = (this.spread + this.humanVariance + this.microTiming / .5) / 3, this.humanSlider > 1 && (this.humanSlider = 1), this.humanSlider < 0 && (this.humanSlider = 0)), this.emitChange();
 	}
 	handleReset() {
-		this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.spread = .5, this.duration = 1, this.minVelocity = 64, this.maxVelocity = 100, this.humanVariance = .5, this.microTiming = .2, this.mode = "advanced", this.humanSlider = .5, this.emitChange();
+		this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.spread = .5, this.duration = 1, this.minVelocity = 64, this.maxVelocity = 100, this.humanVariance = .5, this.microTiming = .2, this.mode = "advanced", this.humanSlider = .5, this.debugExpanded = !0, this.emitChange();
 	}
 	handlePreview() {
 		let e = {
@@ -988,7 +989,7 @@ var $ = class extends X {
 		}));
 	}
 	toggleDebug() {
-		this.debugExpanded = !this.debugExpanded;
+		this.debugExpanded = !this.debugExpanded, this.saveToLocalStorage();
 	}
 	render() {
 		return R`

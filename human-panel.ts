@@ -462,6 +462,7 @@ export class HumanPanel extends LitElement {
         if (state.microTiming !== undefined) this.microTiming = state.microTiming;
         if (state.mode !== undefined) this.mode = state.mode;
         if (state.humanSlider !== undefined) this.humanSlider = state.humanSlider;
+        if (state.debugExpanded !== undefined) this.debugExpanded = state.debugExpanded;
       }
     } catch (e) {
       console.error('Error loading state from localStorage:', e);
@@ -480,6 +481,7 @@ export class HumanPanel extends LitElement {
         microTiming: this.microTiming,
         mode: this.mode,
         humanSlider: this.humanSlider,
+        debugExpanded: this.debugExpanded,
       };
       localStorage.setItem('human-panel-state', JSON.stringify(state));
     } catch (e) {
@@ -581,6 +583,7 @@ export class HumanPanel extends LitElement {
     this.microTiming = 0.2;
     this.mode = 'advanced';
     this.humanSlider = 0.5;
+    this.debugExpanded = true;
 
     this.emitChange();
   }
@@ -613,6 +616,7 @@ export class HumanPanel extends LitElement {
    */
   private toggleDebug() {
     this.debugExpanded = !this.debugExpanded;
+    this.saveToLocalStorage();
   }
 
   render() {
