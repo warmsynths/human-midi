@@ -559,7 +559,7 @@ function Q(e, t, n, r) {
 //#region human-panel.ts
 var $ = class extends X {
 	constructor(...e) {
-		super(...e), this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .5, this.duration = 1, this.minVelocity = 64, this.maxVelocity = 100, this.humanVariance = .5, this.microTiming = .2, this.debugExpanded = !0, this.showInfo = !1;
+		super(...e), this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .5, this.duration = 1, this.minVelocity = 64, this.maxVelocity = 100, this.humanVariance = .5, this.microTiming = .2, this.debugExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
 	}
 	static get styles() {
 		return o`
@@ -635,6 +635,63 @@ var $ = class extends X {
       background: var(--hp-accent);
       color: #ffffff;
       border-color: var(--hp-accent);
+    }
+
+    .panel-subheader {
+      padding: 12px 20px;
+      background: rgba(0, 0, 0, 0.15);
+      border-bottom: 1px solid var(--hp-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mode-tabs {
+      display: flex;
+      background: var(--hp-surface);
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid var(--hp-border);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--hp-text-secondary);
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--hp-text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--hp-accent);
+      color: #ffffff;
+    }
+
+    .reset-btn {
+      background: transparent;
+      border: 1px solid var(--hp-border);
+      color: var(--hp-text-secondary);
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .reset-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--hp-text-primary);
+      border-color: var(--hp-text-secondary);
     }
 
     .panel-content {
@@ -844,7 +901,40 @@ var $ = class extends X {
     }
   `;
 	}
+	connectedCallback() {
+		super.connectedCallback(), this.loadFromLocalStorage();
+	}
+	loadFromLocalStorage() {
+		try {
+			let e = localStorage.getItem("human-panel-state");
+			if (e) {
+				let t = JSON.parse(e);
+				t.chordSequence !== void 0 && (this.chordSequence = t.chordSequence), t.spread !== void 0 && (this.spread = t.spread), t.duration !== void 0 && (this.duration = t.duration), t.minVelocity !== void 0 && (this.minVelocity = t.minVelocity), t.maxVelocity !== void 0 && (this.maxVelocity = t.maxVelocity), t.humanVariance !== void 0 && (this.humanVariance = t.humanVariance), t.microTiming !== void 0 && (this.microTiming = t.microTiming), t.mode !== void 0 && (this.mode = t.mode), t.humanSlider !== void 0 && (this.humanSlider = t.humanSlider);
+			}
+		} catch (e) {
+			console.error("Error loading state from localStorage:", e);
+		}
+	}
+	saveToLocalStorage() {
+		try {
+			let e = {
+				chordSequence: this.chordSequence,
+				spread: this.spread,
+				duration: this.duration,
+				minVelocity: this.minVelocity,
+				maxVelocity: this.maxVelocity,
+				humanVariance: this.humanVariance,
+				microTiming: this.microTiming,
+				mode: this.mode,
+				humanSlider: this.humanSlider
+			};
+			localStorage.setItem("human-panel-state", JSON.stringify(e));
+		} catch (e) {
+			console.error("Error saving state to localStorage:", e);
+		}
+	}
 	emitChange() {
+		this.saveToLocalStorage();
 		let e = {
 			chordSequence: this.chordSequence,
 			spread: this.spread,
@@ -870,6 +960,16 @@ var $ = class extends X {
 	handleNumberChange(e, t, n = !1) {
 		let r = t.target, i = n ? parseInt(r.value, 10) : parseFloat(r.value);
 		this[e] = i, e === "minVelocity" && this.minVelocity > this.maxVelocity ? this.maxVelocity = this.minVelocity : e === "maxVelocity" && this.maxVelocity < this.minVelocity && (this.minVelocity = this.maxVelocity), this.emitChange();
+	}
+	handleBasicSliderChange(e) {
+		let t = e.target, n = parseFloat(t.value);
+		this.humanSlider = n, this.spread = n, this.humanVariance = n, this.microTiming = n * .5, this.emitChange();
+	}
+	setMode(e) {
+		this.mode = e, e === "basic" && (this.humanSlider = (this.spread + this.humanVariance + this.microTiming / .5) / 3, this.humanSlider > 1 && (this.humanSlider = 1), this.humanSlider < 0 && (this.humanSlider = 0)), this.emitChange();
+	}
+	handleReset() {
+		this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.spread = .5, this.duration = 1, this.minVelocity = 64, this.maxVelocity = 100, this.humanVariance = .5, this.microTiming = .2, this.mode = "advanced", this.humanSlider = .5, this.emitChange();
 	}
 	handlePreview() {
 		let e = {
@@ -903,6 +1003,27 @@ var $ = class extends X {
           ?
         </button>
       </div>
+
+      <div class="panel-subheader">
+        <div class="mode-tabs">
+          <button 
+            class="tab-btn ${this.mode === "basic" ? "active" : ""}" 
+            @click=${() => this.setMode("basic")}
+          >
+            Basic
+          </button>
+          <button 
+            class="tab-btn ${this.mode === "advanced" ? "active" : ""}" 
+            @click=${() => this.setMode("advanced")}
+          >
+            Advanced
+          </button>
+        </div>
+        <button class="reset-btn" @click=${this.handleReset} title="Reset to default settings">
+          Reset
+        </button>
+      </div>
+
       <div class="panel-content">
         
         <!-- Section: Debug -->
@@ -947,144 +1068,173 @@ var $ = class extends X {
           ` : ""}
         </div>
 
-        <!-- Section: Chord Gen Group -->
-        <div class="control-group">
-          <div class="group-header-row">
-            <h3 class="group-title">Chord Gen Group</h3>
-            ${this.showInfo ? R`
-              <span class="group-explanation">(strum & note length)</span>
-            ` : ""}
-          </div>
-          
-          <!-- Spread -->
-          <div class="control-row">
-            <div class="control-header">
-              <label class="control-label">Spread</label>
-              <span class="control-value">${this.spread.toFixed(2)}</span>
+        ${this.mode === "basic" ? R`
+          <!-- Section: Basic Controls -->
+          <div class="control-group">
+            <div class="group-header-row">
+              <h3 class="group-title">Basic Controls</h3>
+              ${this.showInfo ? R`
+                <span class="group-explanation">(macro human feel)</span>
+              ` : ""}
             </div>
-            <input 
-              type="range" 
-              min="0" max="1" step="0.01" 
-              .value=${this.spread.toString()}
-              @input=${(e) => this.handleNumberChange("spread", e)}
-              aria-label="Spread"
-            />
-            ${this.showInfo ? R`
-              <div class="setting-explanation">Staggers the start times of notes in the chord for an arpeggiated or strummed feel.</div>
-            ` : ""}
+            
+            <!-- Human Feel -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Human Feel</label>
+                <span class="control-value">${Math.round(this.humanSlider * 100)}%</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" max="1" step="0.01" 
+                .value=${this.humanSlider.toString()}
+                @input=${this.handleBasicSliderChange}
+                aria-label="Human Feel"
+              />
+              ${this.showInfo ? R`
+                <div class="setting-explanation">Adjusts overall human elements (spread, variance, micro-timing) simultaneously.</div>
+              ` : ""}
+            </div>
+          </div>
+        ` : R`
+          <!-- Section: Chord Gen Group -->
+          <div class="control-group">
+            <div class="group-header-row">
+              <h3 class="group-title">Chord Gen Group</h3>
+              ${this.showInfo ? R`
+                <span class="group-explanation">(strum & note length)</span>
+              ` : ""}
+            </div>
+            
+            <!-- Spread -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Spread</label>
+                <span class="control-value">${this.spread.toFixed(2)}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" max="1" step="0.01" 
+                .value=${this.spread.toString()}
+                @input=${(e) => this.handleNumberChange("spread", e)}
+                aria-label="Spread"
+              />
+              ${this.showInfo ? R`
+                <div class="setting-explanation">Staggers the start times of notes in the chord for an arpeggiated or strummed feel.</div>
+              ` : ""}
+            </div>
+
+            <!-- Duration -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Duration</label>
+                <span class="control-value">${this.duration.toFixed(2)}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0.1" max="2.0" step="0.01" 
+                .value=${this.duration.toString()}
+                @input=${(e) => this.handleNumberChange("duration", e)}
+                aria-label="Duration"
+              />
+              ${this.showInfo ? R`
+                <div class="setting-explanation">Controls the base length of the notes during playback.</div>
+              ` : ""}
+            </div>
           </div>
 
-          <!-- Duration -->
-          <div class="control-row">
-            <div class="control-header">
-              <label class="control-label">Duration</label>
-              <span class="control-value">${this.duration.toFixed(2)}</span>
+          <!-- Section: Dynamics Group -->
+          <div class="control-group">
+            <div class="group-header-row">
+              <h3 class="group-title">Dynamics Group</h3>
+              ${this.showInfo ? R`
+                <span class="group-explanation">(velocity & randomness)</span>
+              ` : ""}
             </div>
-            <input 
-              type="range" 
-              min="0.1" max="2.0" step="0.01" 
-              .value=${this.duration.toString()}
-              @input=${(e) => this.handleNumberChange("duration", e)}
-              aria-label="Duration"
-            />
-            ${this.showInfo ? R`
-              <div class="setting-explanation">Controls the base length of the notes during playback.</div>
-            ` : ""}
-          </div>
-        </div>
-
-        <!-- Section: Dynamics Group -->
-        <div class="control-group">
-          <div class="group-header-row">
-            <h3 class="group-title">Dynamics Group</h3>
-            ${this.showInfo ? R`
-              <span class="group-explanation">(velocity & randomness)</span>
-            ` : ""}
-          </div>
-          
-          <!-- Min Velocity -->
-          <div class="control-row">
-            <div class="control-header">
-              <label class="control-label">Min Velocity</label>
-              <span class="control-value">${this.minVelocity}</span>
+            
+            <!-- Min Velocity -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Min Velocity</label>
+                <span class="control-value">${this.minVelocity}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" max="127" step="1" 
+                .value=${this.minVelocity.toString()}
+                @input=${(e) => this.handleNumberChange("minVelocity", e, !0)}
+                aria-label="Min Velocity"
+              />
+              ${this.showInfo ? R`
+                <div class="setting-explanation">The minimum MIDI velocity (volume) for chord notes.</div>
+              ` : ""}
             </div>
-            <input 
-              type="range" 
-              min="0" max="127" step="1" 
-              .value=${this.minVelocity.toString()}
-              @input=${(e) => this.handleNumberChange("minVelocity", e, !0)}
-              aria-label="Min Velocity"
-            />
-            ${this.showInfo ? R`
-              <div class="setting-explanation">The minimum MIDI velocity (volume) for chord notes.</div>
-            ` : ""}
-          </div>
 
-          <!-- Max Velocity -->
-          <div class="control-row">
-            <div class="control-header">
-              <label class="control-label">Max Velocity</label>
-              <span class="control-value">${this.maxVelocity}</span>
+            <!-- Max Velocity -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Max Velocity</label>
+                <span class="control-value">${this.maxVelocity}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" max="127" step="1" 
+                .value=${this.maxVelocity.toString()}
+                @input=${(e) => this.handleNumberChange("maxVelocity", e, !0)}
+                aria-label="Max Velocity"
+              />
+              ${this.showInfo ? R`
+                <div class="setting-explanation">The maximum MIDI velocity (volume) for chord notes.</div>
+              ` : ""}
             </div>
-            <input 
-              type="range" 
-              min="0" max="127" step="1" 
-              .value=${this.maxVelocity.toString()}
-              @input=${(e) => this.handleNumberChange("maxVelocity", e, !0)}
-              aria-label="Max Velocity"
-            />
-            ${this.showInfo ? R`
-              <div class="setting-explanation">The maximum MIDI velocity (volume) for chord notes.</div>
-            ` : ""}
-          </div>
 
-          <!-- Human Variance -->
-          <div class="control-row">
-            <div class="control-header">
-              <label class="control-label">Human Variance</label>
-              <span class="control-value">${this.humanVariance.toFixed(2)}</span>
+            <!-- Human Variance -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Human Variance</label>
+                <span class="control-value">${this.humanVariance.toFixed(2)}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" max="1" step="0.01" 
+                .value=${this.humanVariance.toString()}
+                @input=${(e) => this.handleNumberChange("humanVariance", e)}
+                aria-label="Human Variance"
+              />
+              ${this.showInfo ? R`
+                <div class="setting-explanation">Adds subtle random velocity and duration deviations.</div>
+              ` : ""}
             </div>
-            <input 
-              type="range" 
-              min="0" max="1" step="0.01" 
-              .value=${this.humanVariance.toString()}
-              @input=${(e) => this.handleNumberChange("humanVariance", e)}
-              aria-label="Human Variance"
-            />
-            ${this.showInfo ? R`
-              <div class="setting-explanation">Adds subtle random velocity and duration deviations.</div>
-            ` : ""}
           </div>
-        </div>
 
-        <!-- Section: Timing Grid Group -->
-        <div class="control-group">
-          <div class="group-header-row">
-            <h3 class="group-title">Timing Grid Group</h3>
-            ${this.showInfo ? R`
-              <span class="group-explanation">(onset timing offsets)</span>
-            ` : ""}
-          </div>
-          
-          <!-- Micro-timing / Variation -->
-          <div class="control-row">
-            <div class="control-header">
-              <label class="control-label">Micro-timing (Variation)</label>
-              <span class="control-value">${this.microTiming.toFixed(2)}</span>
+          <!-- Section: Timing Grid Group -->
+          <div class="control-group">
+            <div class="group-header-row">
+              <h3 class="group-title">Timing Grid Group</h3>
+              ${this.showInfo ? R`
+                <span class="group-explanation">(onset timing offsets)</span>
+              ` : ""}
             </div>
-            <input 
-              type="range" 
-              min="0" max="1" step="0.01" 
-              .value=${this.microTiming.toString()}
-              @input=${(e) => this.handleNumberChange("microTiming", e)}
-              aria-label="Micro-timing Variation"
-            />
-            ${this.showInfo ? R`
-              <div class="setting-explanation">Shifts note onset times slightly early or late for human feel.</div>
-            ` : ""}
+            
+            <!-- Micro-timing / Variation -->
+            <div class="control-row">
+              <div class="control-header">
+                <label class="control-label">Micro-timing (Variation)</label>
+                <span class="control-value">${this.microTiming.toFixed(2)}</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" max="1" step="0.01" 
+                .value=${this.microTiming.toString()}
+                @input=${(e) => this.handleNumberChange("microTiming", e)}
+                aria-label="Micro-timing Variation"
+              />
+              ${this.showInfo ? R`
+                <div class="setting-explanation">Shifts note onset times slightly early or late for human feel.</div>
+              ` : ""}
+            </div>
           </div>
-        </div>
-
+        `}
       </div>
     `;
 	}
@@ -1092,6 +1242,6 @@ var $ = class extends X {
 Q([Z({ type: String })], $.prototype, "heading", void 0), Q([Z({
 	type: String,
 	attribute: "chord-sequence"
-})], $.prototype, "chordSequence", void 0), Q([Z({ type: Boolean })], $.prototype, "hideInput", void 0), Q([Z({ type: Number })], $.prototype, "spread", void 0), Q([Z({ type: Number })], $.prototype, "duration", void 0), Q([Z({ type: Number })], $.prototype, "minVelocity", void 0), Q([Z({ type: Number })], $.prototype, "maxVelocity", void 0), Q([Z({ type: Number })], $.prototype, "humanVariance", void 0), Q([Z({ type: Number })], $.prototype, "microTiming", void 0), Q([Z({ type: Boolean })], $.prototype, "debugExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "showInfo", void 0), $ = Q([he("human-panel")], $);
+})], $.prototype, "chordSequence", void 0), Q([Z({ type: Boolean })], $.prototype, "hideInput", void 0), Q([Z({ type: Number })], $.prototype, "spread", void 0), Q([Z({ type: Number })], $.prototype, "duration", void 0), Q([Z({ type: Number })], $.prototype, "minVelocity", void 0), Q([Z({ type: Number })], $.prototype, "maxVelocity", void 0), Q([Z({ type: Number })], $.prototype, "humanVariance", void 0), Q([Z({ type: Number })], $.prototype, "microTiming", void 0), Q([Z({ type: Boolean })], $.prototype, "debugExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "showInfo", void 0), Q([Z({ type: String })], $.prototype, "mode", void 0), Q([Z({ type: Number })], $.prototype, "humanSlider", void 0), $ = Q([he("human-panel")], $);
 //#endregion
 export { $ as HumanPanel };

@@ -66,6 +66,17 @@ export declare class HumanPanel extends LitElement {
      */
     showInfo: boolean;
     /**
+     * Mode of panel: 'basic' or 'advanced'
+     */
+    mode: string;
+    /**
+     * Single Human Feel slider for basic mode (0.0 to 1.0)
+     */
+    humanSlider: number;
+    connectedCallback(): void;
+    private loadFromLocalStorage;
+    private saveToLocalStorage;
+    /**
      * Emits the `human-change` custom event with the current state configuration.
      */
     private emitChange;
@@ -81,6 +92,9 @@ export declare class HumanPanel extends LitElement {
      * @param isInt - Whether the value should be parsed as an integer
      */
     private handleNumberChange;
+    private handleBasicSliderChange;
+    private setMode;
+    private handleReset;
     /**
      * Emits the `human-preview` event to trigger playback in the host application.
      */
