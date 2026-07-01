@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Humanizer Engine</title>
     <link rel="stylesheet" href="./src/index.css" />
-    <script type="module" src="/humanizer-panel.ts"></script>
+    <script type="module" src="/human-panel.ts"></script>
     <style>
       body {
         margin: 0;
@@ -19,14 +19,14 @@
     </style>
   </head>
   <body>
-    <humanizer-panel></humanizer-panel>
+    <human-panel></human-panel>
     <script>
-      const panel = document.querySelector('humanizer-panel');
-      panel.addEventListener('humanizer-preview', (e) => {
-        console.log('🎵 humanizer-preview event received:', e.detail);
+      const panel = document.querySelector('human-panel');
+      panel.addEventListener('human-preview', (e) => {
+        console.log('🎵 human-preview event received:', e.detail);
       });
-      panel.addEventListener('humanizer-change', (e) => {
-        console.log('⚙️ humanizer-change event received:', e.detail);
+      panel.addEventListener('human-change', (e) => {
+        console.log('⚙️ human-change event received:', e.detail);
       });
     </script>
   </body>
