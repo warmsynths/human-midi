@@ -116,3 +116,12 @@ human-panel {
   --human-font: 'Inter', sans-serif;
 }
 ```
+
+---
+
+## License
+
+This project is licensed under the GNU General Public License v3 (GPL v3) - see the [LICENSE](file:///e:/work/human-midi/LICENSE) file for details.
+
+
+
