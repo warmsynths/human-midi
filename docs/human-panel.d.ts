@@ -1,4 +1,5 @@
 import { LitElement } from 'lit';
+export * from './shared-schema.js';
 /**
  * Encapsulates the entire state configuration for the HumanEngine.
  */

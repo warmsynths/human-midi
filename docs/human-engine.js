@@ -472,16 +472,16 @@ var ce = class {
 	_$AI(e) {
 		G(this, e);
 	}
-}, J = y.litHtmlPolyfillSupport;
-J?.(W, K), (y.litHtmlVersions ??= []).push("3.3.3");
-var pe = (e, t, n) => {
+}, pe = y.litHtmlPolyfillSupport;
+pe?.(W, K), (y.litHtmlVersions ??= []).push("3.3.3");
+var me = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
 		r._$litPart$ = i = new K(t.insertBefore(D(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, Y = globalThis, X = class extends v {
+}, J = globalThis, Y = class extends v {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -491,7 +491,7 @@ var pe = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = pe(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = me(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -503,22 +503,22 @@ var pe = (e, t, n) => {
 		return z;
 	}
 };
-X._$litElement$ = !0, X.finalized = !0, Y.litElementHydrateSupport?.({ LitElement: X });
-var me = Y.litElementPolyfillSupport;
-me?.({ LitElement: X }), (Y.litElementVersions ??= []).push("4.2.2");
+Y._$litElement$ = !0, Y.finalized = !0, J.litElementHydrateSupport?.({ LitElement: Y });
+var he = J.litElementPolyfillSupport;
+he?.({ LitElement: Y }), (J.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/custom-element.js
-var he = (e) => (t, n) => {
+var ge = (e) => (t, n) => {
 	n === void 0 ? customElements.define(e, t) : n.addInitializer(() => {
 		customElements.define(e, t);
 	});
-}, ge = {
+}, _e = {
 	attribute: !0,
 	type: String,
 	converter: h,
 	reflect: !1,
 	hasChanged: g
-}, _e = (e = ge, t, n) => {
+}, X = (e = _e, t, n) => {
 	let { kind: r, metadata: i } = n, a = globalThis.litPropertyMetadata.get(i);
 	if (a === void 0 && globalThis.litPropertyMetadata.set(i, a = /* @__PURE__ */ new Map()), r === "setter" && ((e = Object.create(e)).wrapped = !0), a.set(n.name, e), r === "accessor") {
 		let { name: r } = n;
@@ -542,7 +542,7 @@ var he = (e) => (t, n) => {
 	throw Error("Unsupported decorator location: " + r);
 };
 function Z(e) {
-	return (t, n) => typeof n == "object" ? _e(e, t, n) : ((e, t, n) => {
+	return (t, n) => typeof n == "object" ? X(e, t, n) : ((e, t, n) => {
 		let r = t.hasOwnProperty(n);
 		return t.constructor.createProperty(n, e), r ? Object.getOwnPropertyDescriptor(t, n) : void 0;
 	})(e, t, n);
@@ -556,8 +556,28 @@ function Q(e, t, n, r) {
 	return i > 3 && a && Object.defineProperty(t, n, a), a;
 }
 //#endregion
+//#region shared-schema.ts
+function ve(e) {
+	try {
+		let t = JSON.stringify(e);
+		return btoa(t).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+	} catch (e) {
+		return console.error("Failed to encode progression", e), "";
+	}
+}
+function ye(e) {
+	try {
+		let t = e.replace(/-/g, "+").replace(/_/g, "/");
+		for (; t.length % 4;) t += "=";
+		let n = atob(t);
+		return JSON.parse(n);
+	} catch (e) {
+		return console.error("Failed to decode progression", e), null;
+	}
+}
+//#endregion
 //#region human-panel.ts
-var $ = class extends X {
+var $ = class extends Y {
 	constructor(...e) {
 		super(...e), this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.bpm = 80, this.arpMode = "off", this.arpRate = "1/16", this.arpRange = 1, this.debugExpanded = !0, this.arpExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
 	}
@@ -1489,6 +1509,6 @@ Q([Z({ type: String })], $.prototype, "heading", void 0), Q([Z({
 })], $.prototype, "arpRate", void 0), Q([Z({
 	type: Number,
 	attribute: "arp-range"
-})], $.prototype, "arpRange", void 0), Q([Z({ type: Boolean })], $.prototype, "debugExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "arpExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "showInfo", void 0), Q([Z({ type: String })], $.prototype, "mode", void 0), Q([Z({ type: Number })], $.prototype, "humanSlider", void 0), $ = Q([he("human-panel")], $);
+})], $.prototype, "arpRange", void 0), Q([Z({ type: Boolean })], $.prototype, "debugExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "arpExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "showInfo", void 0), Q([Z({ type: String })], $.prototype, "mode", void 0), Q([Z({ type: Number })], $.prototype, "humanSlider", void 0), $ = Q([ge("human-panel")], $);
 //#endregion
-export { $ as HumanPanel };
+export { $ as HumanPanel, ye as decodeProgression, ve as encodeProgression };

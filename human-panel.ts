@@ -1,5 +1,6 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+export * from './shared-schema.js';
 
 /**
  * Encapsulates the entire state configuration for the HumanEngine.
