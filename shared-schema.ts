@@ -72,7 +72,7 @@ export const CHORD_CORES: ChordOption[] = [
 export const CHORD_MODIFIERS: ChordOption[] = [
   { label: 'None', value: '' },
   { label: '6th', value: '6' },
-  { label: 'Minor 7th (m7)', value: '7' },
+  { label: '7th (dom / m7)', value: '7' },
   { label: 'Major 7th (M7)', value: 'maj7' },
   { label: '9th', value: '9' }
 ];

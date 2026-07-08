@@ -602,7 +602,7 @@ var be = [
 		value: "6"
 	},
 	{
-		label: "Minor 7th (m7)",
+		label: "7th (dom / m7)",
 		value: "7"
 	},
 	{
