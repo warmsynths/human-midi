@@ -56,3 +56,58 @@ export function decodeProgression(encodedUrlSafe: string): SharedProgression | n
     return null;
   }
 }
+
+export interface ChordOption {
+  label: string;
+  value: string;
+}
+
+export const CHORD_CORES: ChordOption[] = [
+  { label: 'Major', value: 'maj' },
+  { label: 'Minor', value: 'm' },
+  { label: 'Suspended (Sus)', value: 'sus4' },
+  { label: 'Diminished', value: 'dim' }
+];
+
+export const CHORD_MODIFIERS: ChordOption[] = [
+  { label: 'None', value: '' },
+  { label: '6th', value: '6' },
+  { label: 'Minor 7th (m7)', value: '7' },
+  { label: 'Major 7th (M7)', value: 'maj7' },
+  { label: '9th', value: '9' }
+];
+
+/**
+ * Resolves a core and modifier to a Tonal.js compatible chord suffix.
+ */
+export function getChordSuffix(core: string, modifier: string): string {
+  if (core === 'maj') {
+    if (modifier === '') return '';
+    if (modifier === '6') return '6';
+    if (modifier === '7') return '7'; // Dominant 7
+    if (modifier === 'maj7') return 'maj7';
+    if (modifier === '9') return '9'; // Dominant 9
+  }
+  if (core === 'm') {
+    if (modifier === '') return 'm';
+    if (modifier === '6') return 'm6';
+    if (modifier === '7') return 'm7'; // Minor 7
+    if (modifier === 'maj7') return 'mM7'; // Minor Major 7
+    if (modifier === '9') return 'm9'; // Minor 9
+  }
+  if (core === 'sus4') {
+    if (modifier === '') return 'sus4';
+    if (modifier === '6') return '6sus4'; // uncommon but supported by tonal
+    if (modifier === '7') return '7sus4';
+    if (modifier === 'maj7') return 'maj7sus4'; // uncommon
+    if (modifier === '9') return '9sus4'; // suspended 9th
+  }
+  if (core === 'dim') {
+    if (modifier === '') return 'dim';
+    if (modifier === '6') return 'dim6';
+    if (modifier === '7') return 'm7b5'; // Half-diminished
+    if (modifier === 'maj7') return 'dimMaj7';
+    if (modifier === '9') return 'dim9'; // usually dim7(add 9) but dim9 works in tonal
+  }
+  return core + modifier;
+}

@@ -575,6 +575,76 @@ function ye(e) {
 		return console.error("Failed to decode progression", e), null;
 	}
 }
+var be = [
+	{
+		label: "Major",
+		value: "maj"
+	},
+	{
+		label: "Minor",
+		value: "m"
+	},
+	{
+		label: "Suspended (Sus)",
+		value: "sus4"
+	},
+	{
+		label: "Diminished",
+		value: "dim"
+	}
+], xe = [
+	{
+		label: "None",
+		value: ""
+	},
+	{
+		label: "6th",
+		value: "6"
+	},
+	{
+		label: "Minor 7th (m7)",
+		value: "7"
+	},
+	{
+		label: "Major 7th (M7)",
+		value: "maj7"
+	},
+	{
+		label: "9th",
+		value: "9"
+	}
+];
+function Se(e, t) {
+	if (e === "maj") {
+		if (t === "") return "";
+		if (t === "6") return "6";
+		if (t === "7") return "7";
+		if (t === "maj7") return "maj7";
+		if (t === "9") return "9";
+	}
+	if (e === "m") {
+		if (t === "") return "m";
+		if (t === "6") return "m6";
+		if (t === "7") return "m7";
+		if (t === "maj7") return "mM7";
+		if (t === "9") return "m9";
+	}
+	if (e === "sus4") {
+		if (t === "") return "sus4";
+		if (t === "6") return "6sus4";
+		if (t === "7") return "7sus4";
+		if (t === "maj7") return "maj7sus4";
+		if (t === "9") return "9sus4";
+	}
+	if (e === "dim") {
+		if (t === "") return "dim";
+		if (t === "6") return "dim6";
+		if (t === "7") return "m7b5";
+		if (t === "maj7") return "dimMaj7";
+		if (t === "9") return "dim9";
+	}
+	return e + t;
+}
 //#endregion
 //#region human-panel.ts
 var $ = class extends Y {
@@ -1511,4 +1581,4 @@ Q([Z({ type: String })], $.prototype, "heading", void 0), Q([Z({
 	attribute: "arp-range"
 })], $.prototype, "arpRange", void 0), Q([Z({ type: Boolean })], $.prototype, "debugExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "arpExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "showInfo", void 0), Q([Z({ type: String })], $.prototype, "mode", void 0), Q([Z({ type: Number })], $.prototype, "humanSlider", void 0), $ = Q([ge("human-panel")], $);
 //#endregion
-export { $ as HumanPanel, ye as decodeProgression, ve as encodeProgression };
+export { be as CHORD_CORES, xe as CHORD_MODIFIERS, $ as HumanPanel, ye as decodeProgression, ve as encodeProgression, Se as getChordSuffix };
