@@ -649,7 +649,12 @@ function Se(e, t) {
 //#region human-panel.ts
 var $ = class extends Y {
 	constructor(...e) {
-		super(...e), this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.bpm = 80, this.arpMode = "off", this.arpRate = "1/16", this.arpRange = 1, this.debugExpanded = !0, this.arpExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
+		super(...e), this.layout = "full", this.parameterOverrides = {}, this.sourceLabels = {
+			spread: "Spread",
+			duration: "Pattern + Density",
+			humanVariance: "Humanise",
+			microTiming: "Swing + Humanise"
+		}, this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.bpm = 80, this.arpMode = "off", this.arpRate = "1/16", this.arpRange = 1, this.debugExpanded = !0, this.arpExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
 	}
 	static get styles() {
 		return o`
@@ -657,6 +662,7 @@ var $ = class extends Y {
       /* Theme Tokens - Host applications can override these CSS custom properties */
       --hp-bg: var(--human-bg, #1a1a24);
       --hp-surface: var(--human-surface, #242530);
+      --hp-surface-2: var(--human-surface-2, rgba(255, 255, 255, 0.08));
       --hp-border: var(--human-border, #3b3c4f);
       --hp-text-primary: var(--human-text-primary, #f5f5f7);
       --hp-text-secondary: var(--human-text-secondary, #a3a6be);
@@ -664,6 +670,9 @@ var $ = class extends Y {
       --hp-accent-hover: var(--human-accent-hover, #ffb067);
       --hp-radius: var(--human-radius, 12px);
       --hp-font-family: var(--human-font, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif);
+      --hp-gap: var(--human-gap, 14px 26px);
+      --hp-label-size: var(--human-label-size, 12px);
+      --hp-label-weight: var(--human-label-weight, 800);
 
       display: block;
       width: 100%;
@@ -677,6 +686,102 @@ var $ = class extends Y {
       box-sizing: border-box;
       overflow: hidden;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    :host([layout="embedded"]) {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      background: var(--hp-bg, transparent);
+      color: var(--hp-text-primary);
+      font-family: var(--hp-font-family);
+      border-radius: var(--hp-radius, 0);
+      border: none;
+      box-sizing: border-box;
+      overflow: visible;
+      box-shadow: none;
+      padding: var(--hp-padding, 0);
+    }
+
+    .embedded-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--hp-gap, 14px 26px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .embedded-param {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .embedded-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .embedded-label {
+      font-size: var(--hp-label-size, 12px);
+      font-weight: var(--hp-label-weight, 800);
+      color: var(--hp-text-primary);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .embedded-relink-btn {
+      border: none;
+      font-family: inherit;
+      background: transparent;
+      color: var(--hp-accent, #9E5D53);
+      font-size: 10.5px;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 6px;
+      transition: opacity 140ms ease, background 140ms ease;
+    }
+
+    .embedded-relink-btn:hover {
+      background: var(--hp-surface-2, rgba(0, 0, 0, 0.05));
+    }
+
+    .embedded-relink-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .embedded-badge {
+      font-size: 11.5px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--hp-text-primary);
+      background: var(--hp-surface-2, rgba(0, 0, 0, 0.06));
+      border-radius: 6px;
+      padding: 2px 7px;
+    }
+
+    .embedded-slider {
+      width: 100%;
+      margin-top: 7px;
+      accent-color: var(--hp-accent, #9E5D53);
+      cursor: pointer;
+    }
+
+    .embedded-source {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--hp-text-secondary, rgba(46, 39, 31, 0.36));
+      margin-top: 3px;
+    }
+
+    .embedded-source.detached {
+      color: var(--hp-accent, #9E5D53);
     }
 
     * {
@@ -1079,7 +1184,7 @@ var $ = class extends Y {
   `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), this.loadFromLocalStorage();
+		super.connectedCallback(), this.layout !== "embedded" && this.loadFromLocalStorage();
 	}
 	loadFromLocalStorage() {
 		try {
@@ -1116,7 +1221,7 @@ var $ = class extends Y {
 		}
 	}
 	emitChange() {
-		this.saveToLocalStorage();
+		this.layout !== "embedded" && this.saveToLocalStorage();
 		let e = {
 			chordSequence: this.chordSequence,
 			spread: this.spread,
@@ -1200,8 +1305,92 @@ var $ = class extends Y {
 	toggleDebug() {
 		this.debugExpanded = !this.debugExpanded, this.saveToLocalStorage();
 	}
-	render() {
+	handleRelink(e) {
+		this.dispatchEvent(new CustomEvent("parameter-relink", {
+			detail: { param: e },
+			bubbles: !0,
+			composed: !0
+		}));
+	}
+	handleEmbeddedSliderChange(e, t) {
+		let n = t.target, r = parseFloat(n.value);
+		this[e] = r, this.dispatchEvent(new CustomEvent("parameter-override", {
+			detail: {
+				param: e,
+				value: r
+			},
+			bubbles: !0,
+			composed: !0
+		})), this.emitChange();
+	}
+	renderEmbedded() {
 		return R`
+      <div class="embedded-grid" part="grid">
+        ${[
+			{
+				key: "spread",
+				label: "Spread",
+				min: 0,
+				max: 1,
+				step: .01
+			},
+			{
+				key: "duration",
+				label: "Duration",
+				min: .1,
+				max: 2,
+				step: .01
+			},
+			{
+				key: "humanVariance",
+				label: "Human variance",
+				min: 0,
+				max: 1,
+				step: .01
+			},
+			{
+				key: "microTiming",
+				label: "Micro-timing",
+				min: 0,
+				max: 1,
+				step: .01
+			}
+		].map((e) => {
+			let t = this.parameterOverrides && this.parameterOverrides[e.key] !== void 0, n = typeof this[e.key] == "number" ? this[e.key] : e.min, r = Number(n).toFixed(2), i = t ? "Set by hand" : `From ${this.sourceLabels[e.key] || e.label}`;
+			return R`
+            <div class="embedded-param" part="param-row">
+              <div class="embedded-header">
+                <div class="embedded-label" part="param-label">${e.label}</div>
+                <button
+                  type="button"
+                  class="embedded-relink-btn ${t ? "" : "hidden"}"
+                  part="relink-btn"
+                  @click=${() => this.handleRelink(e.key)}
+                  aria-label="Re-link ${e.label} to the feel axis"
+                  tabindex=${t ? 0 : -1}
+                >Re-link</button>
+                <div class="embedded-badge" part="value-badge">${r}</div>
+              </div>
+              <input
+                type="range"
+                class="embedded-slider"
+                part="slider"
+                min=${e.min}
+                max=${e.max}
+                step=${e.step}
+                .value=${String(n)}
+                @input=${(t) => this.handleEmbeddedSliderChange(e.key, t)}
+                aria-label=${e.label}
+              />
+              <div class="embedded-source ${t ? "detached" : ""}" part="source-tag">${i}</div>
+            </div>
+          `;
+		})}
+      </div>
+    `;
+	}
+	render() {
+		return this.layout === "embedded" ? this.renderEmbedded() : R`
       <div class="panel-header">
         <h2>${this.heading}</h2>
         <button 
@@ -1567,7 +1756,10 @@ var $ = class extends Y {
     `;
 	}
 };
-Q([Z({ type: String })], $.prototype, "heading", void 0), Q([Z({
+Q([Z({
+	type: String,
+	reflect: !0
+})], $.prototype, "layout", void 0), Q([Z({ type: Object })], $.prototype, "parameterOverrides", void 0), Q([Z({ type: Object })], $.prototype, "sourceLabels", void 0), Q([Z({ type: String })], $.prototype, "heading", void 0), Q([Z({
 	type: String,
 	attribute: "chord-sequence"
 })], $.prototype, "chordSequence", void 0), Q([Z({ type: Boolean })], $.prototype, "hideInput", void 0), Q([Z({ type: Number })], $.prototype, "spread", void 0), Q([Z({ type: Number })], $.prototype, "duration", void 0), Q([Z({ type: Number })], $.prototype, "minVelocity", void 0), Q([Z({ type: Number })], $.prototype, "maxVelocity", void 0), Q([Z({ type: Number })], $.prototype, "humanVariance", void 0), Q([Z({ type: Number })], $.prototype, "microTiming", void 0), Q([Z({ type: Number })], $.prototype, "bpm", void 0), Q([Z({

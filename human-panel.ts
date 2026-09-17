@@ -35,6 +35,7 @@ export class HumanPanel extends LitElement {
       /* Theme Tokens - Host applications can override these CSS custom properties */
       --hp-bg: var(--human-bg, #1a1a24);
       --hp-surface: var(--human-surface, #242530);
+      --hp-surface-2: var(--human-surface-2, rgba(255, 255, 255, 0.08));
       --hp-border: var(--human-border, #3b3c4f);
       --hp-text-primary: var(--human-text-primary, #f5f5f7);
       --hp-text-secondary: var(--human-text-secondary, #a3a6be);
@@ -42,6 +43,9 @@ export class HumanPanel extends LitElement {
       --hp-accent-hover: var(--human-accent-hover, #ffb067);
       --hp-radius: var(--human-radius, 12px);
       --hp-font-family: var(--human-font, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif);
+      --hp-gap: var(--human-gap, 14px 26px);
+      --hp-label-size: var(--human-label-size, 12px);
+      --hp-label-weight: var(--human-label-weight, 800);
 
       display: block;
       width: 100%;
@@ -55,6 +59,102 @@ export class HumanPanel extends LitElement {
       box-sizing: border-box;
       overflow: hidden;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    :host([layout="embedded"]) {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      background: var(--hp-bg, transparent);
+      color: var(--hp-text-primary);
+      font-family: var(--hp-font-family);
+      border-radius: var(--hp-radius, 0);
+      border: none;
+      box-sizing: border-box;
+      overflow: visible;
+      box-shadow: none;
+      padding: var(--hp-padding, 0);
+    }
+
+    .embedded-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--hp-gap, 14px 26px);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .embedded-param {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .embedded-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .embedded-label {
+      font-size: var(--hp-label-size, 12px);
+      font-weight: var(--hp-label-weight, 800);
+      color: var(--hp-text-primary);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .embedded-relink-btn {
+      border: none;
+      font-family: inherit;
+      background: transparent;
+      color: var(--hp-accent, #9E5D53);
+      font-size: 10.5px;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 6px;
+      transition: opacity 140ms ease, background 140ms ease;
+    }
+
+    .embedded-relink-btn:hover {
+      background: var(--hp-surface-2, rgba(0, 0, 0, 0.05));
+    }
+
+    .embedded-relink-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .embedded-badge {
+      font-size: 11.5px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--hp-text-primary);
+      background: var(--hp-surface-2, rgba(0, 0, 0, 0.06));
+      border-radius: 6px;
+      padding: 2px 7px;
+    }
+
+    .embedded-slider {
+      width: 100%;
+      margin-top: 7px;
+      accent-color: var(--hp-accent, #9E5D53);
+      cursor: pointer;
+    }
+
+    .embedded-source {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--hp-text-secondary, rgba(46, 39, 31, 0.36));
+      margin-top: 3px;
+    }
+
+    .embedded-source.detached {
+      color: var(--hp-accent, #9E5D53);
     }
 
     * {
@@ -458,6 +558,29 @@ export class HumanPanel extends LitElement {
   }
 
   /**
+   * Layout mode: 'full' for the complete standalone panel, 'embedded' for the lightweight engine parameters view.
+   */
+  @property({ type: String, reflect: true })
+  layout: 'full' | 'embedded' = 'full';
+
+  /**
+   * Object indicating which parameters have manual host overrides.
+   */
+  @property({ type: Object })
+  parameterOverrides: Record<string, number> = {};
+
+  /**
+   * Labels describing where non-overridden values derive from.
+   */
+  @property({ type: Object })
+  sourceLabels: Record<string, string> = {
+    spread: 'Spread',
+    duration: 'Pattern + Density',
+    humanVariance: 'Humanise',
+    microTiming: 'Swing + Humanise'
+  };
+
+  /**
    * Custom heading text displayed at the top of the panel.
    */
   @property({ type: String })
@@ -567,7 +690,9 @@ export class HumanPanel extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.loadFromLocalStorage();
+    if (this.layout !== 'embedded') {
+      this.loadFromLocalStorage();
+    }
   }
 
   private loadFromLocalStorage() {
@@ -623,7 +748,9 @@ export class HumanPanel extends LitElement {
    * Emits the `human-change` custom event with the current state configuration.
    */
   private emitChange() {
-    this.saveToLocalStorage();
+    if (this.layout !== 'embedded') {
+      this.saveToLocalStorage();
+    }
 
     const state: HumanState = {
       chordSequence: this.chordSequence,
@@ -784,7 +911,84 @@ export class HumanPanel extends LitElement {
     this.saveToLocalStorage();
   }
 
+  private handleRelink(param: string) {
+    this.dispatchEvent(
+      new CustomEvent('parameter-relink', {
+        detail: { param },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  private handleEmbeddedSliderChange(param: keyof HumanState, e: Event) {
+    const input = e.target as HTMLInputElement;
+    const value = parseFloat(input.value);
+    (this as any)[param] = value;
+    this.dispatchEvent(
+      new CustomEvent('parameter-override', {
+        detail: { param, value },
+        bubbles: true,
+        composed: true,
+      })
+    );
+    this.emitChange();
+  }
+
+  private renderEmbedded() {
+    const params: { key: keyof HumanState; label: string; min: number; max: number; step: number }[] = [
+      { key: 'spread', label: 'Spread', min: 0, max: 1, step: 0.01 },
+      { key: 'duration', label: 'Duration', min: 0.1, max: 2, step: 0.01 },
+      { key: 'humanVariance', label: 'Human variance', min: 0, max: 1, step: 0.01 },
+      { key: 'microTiming', label: 'Micro-timing', min: 0, max: 1, step: 0.01 },
+    ];
+
+    return html`
+      <div class="embedded-grid" part="grid">
+        ${params.map(p => {
+          const detached = this.parameterOverrides && this.parameterOverrides[p.key] !== undefined;
+          const val = typeof (this as any)[p.key] === 'number' ? (this as any)[p.key] : p.min;
+          const displayVal = Number(val).toFixed(2);
+          const fromText = detached ? 'Set by hand' : `From ${this.sourceLabels[p.key] || p.label}`;
+
+          return html`
+            <div class="embedded-param" part="param-row">
+              <div class="embedded-header">
+                <div class="embedded-label" part="param-label">${p.label}</div>
+                <button
+                  type="button"
+                  class="embedded-relink-btn ${detached ? '' : 'hidden'}"
+                  part="relink-btn"
+                  @click=${() => this.handleRelink(p.key as string)}
+                  aria-label="Re-link ${p.label} to the feel axis"
+                  tabindex=${detached ? 0 : -1}
+                >Re-link</button>
+                <div class="embedded-badge" part="value-badge">${displayVal}</div>
+              </div>
+              <input
+                type="range"
+                class="embedded-slider"
+                part="slider"
+                min=${p.min}
+                max=${p.max}
+                step=${p.step}
+                .value=${String(val)}
+                @input=${(e: Event) => this.handleEmbeddedSliderChange(p.key, e)}
+                aria-label=${p.label}
+              />
+              <div class="embedded-source ${detached ? 'detached' : ''}" part="source-tag">${fromText}</div>
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }
+
   render() {
+    if (this.layout === 'embedded') {
+      return this.renderEmbedded();
+    }
+
     return html`
       <div class="panel-header">
         <h2>${this.heading}</h2>

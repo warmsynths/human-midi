@@ -27,6 +27,18 @@ export interface HumanState {
 export declare class HumanPanel extends LitElement {
     static get styles(): import('lit').CSSResult;
     /**
+     * Layout mode: 'full' for the complete standalone panel, 'embedded' for the lightweight engine parameters view.
+     */
+    layout: 'full' | 'embedded';
+    /**
+     * Object indicating which parameters have manual host overrides.
+     */
+    parameterOverrides: Record<string, number>;
+    /**
+     * Labels describing where non-overridden values derive from.
+     */
+    sourceLabels: Record<string, string>;
+    /**
      * Custom heading text displayed at the top of the panel.
      */
     heading: string;
@@ -132,6 +144,9 @@ export declare class HumanPanel extends LitElement {
      * Toggles the collapsed state of the debug section.
      */
     private toggleDebug;
+    private handleRelink;
+    private handleEmbeddedSliderChange;
+    private renderEmbedded;
     render(): import('lit-html').TemplateResult<1>;
 }
 declare global {
