@@ -653,8 +653,14 @@ var $ = class extends Y {
 			spread: "Spread",
 			duration: "Pattern + Density",
 			humanVariance: "Humanise",
-			microTiming: "Swing + Humanise"
-		}, this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.bpm = 80, this.arpMode = "off", this.arpRate = "1/16", this.arpRange = 1, this.debugExpanded = !0, this.arpExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
+			microTiming: "Swing + Humanise",
+			arpMode: "Pattern",
+			arpRate: "Pattern",
+			arpRange: "Pattern",
+			arpGate: "Gate",
+			minVelocity: "Genre",
+			maxVelocity: "Genre"
+		}, this.heading = "Human Engine", this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.hideInput = !1, this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.bpm = 80, this.arpMode = "off", this.arpRate = "1/16", this.arpRange = 1, this.arpGate = .85, this.debugExpanded = !0, this.arpExpanded = !0, this.showInfo = !1, this.mode = "advanced", this.humanSlider = .5;
 	}
 	static get styles() {
 		return o`
@@ -782,6 +788,76 @@ var $ = class extends Y {
 
     .embedded-source.detached {
       color: var(--hp-accent, #9E5D53);
+    }
+
+    .embedded-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .embedded-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .embedded-section-title {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--hp-text-secondary, rgba(46, 39, 31, 0.45));
+      margin: 0 0 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .embedded-select {
+      width: 100%;
+      margin-top: 7px;
+      background: var(--hp-surface-2, rgba(0, 0, 0, 0.05));
+      border: 1px solid var(--hp-border, rgba(46, 39, 31, 0.12));
+      color: var(--hp-text-primary, #2E271F);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239E5D53' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 12px;
+    }
+
+    .embedded-select:focus {
+      outline: none;
+      border-color: var(--hp-accent, #9E5D53);
+    }
+
+    .embedded-range-bar {
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--hp-surface-2, rgba(0, 0, 0, 0.08));
+      margin-top: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .embedded-range-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: var(--hp-accent, #9E5D53);
+      border-radius: 2px;
+      opacity: 0.8;
     }
 
     * {
@@ -1191,7 +1267,7 @@ var $ = class extends Y {
 			let e = localStorage.getItem("human-panel-state");
 			if (e) {
 				let t = JSON.parse(e);
-				t.chordSequence !== void 0 && (this.chordSequence = t.chordSequence), t.spread !== void 0 && (this.spread = t.spread), t.duration !== void 0 && (this.duration = t.duration), t.minVelocity !== void 0 && (this.minVelocity = t.minVelocity), t.maxVelocity !== void 0 && (this.maxVelocity = t.maxVelocity), t.humanVariance !== void 0 && (this.humanVariance = t.humanVariance), t.microTiming !== void 0 && (this.microTiming = t.microTiming), t.bpm !== void 0 && (this.bpm = t.bpm), t.arpMode !== void 0 && (this.arpMode = t.arpMode), t.arpRate !== void 0 && (this.arpRate = t.arpRate), t.arpRange !== void 0 && (this.arpRange = t.arpRange), t.mode !== void 0 && (this.mode = t.mode), t.humanSlider !== void 0 && (this.humanSlider = t.humanSlider), t.debugExpanded !== void 0 && (this.debugExpanded = t.debugExpanded);
+				t.chordSequence !== void 0 && (this.chordSequence = t.chordSequence), t.spread !== void 0 && (this.spread = t.spread), t.duration !== void 0 && (this.duration = t.duration), t.minVelocity !== void 0 && (this.minVelocity = t.minVelocity), t.maxVelocity !== void 0 && (this.maxVelocity = t.maxVelocity), t.humanVariance !== void 0 && (this.humanVariance = t.humanVariance), t.microTiming !== void 0 && (this.microTiming = t.microTiming), t.bpm !== void 0 && (this.bpm = t.bpm), t.arpMode !== void 0 && (this.arpMode = t.arpMode), t.arpRate !== void 0 && (this.arpRate = t.arpRate), t.arpRange !== void 0 && (this.arpRange = t.arpRange), t.arpGate !== void 0 && (this.arpGate = t.arpGate), t.mode !== void 0 && (this.mode = t.mode), t.humanSlider !== void 0 && (this.humanSlider = t.humanSlider), t.debugExpanded !== void 0 && (this.debugExpanded = t.debugExpanded);
 			}
 		} catch (e) {
 			console.error("Error loading state from localStorage:", e);
@@ -1211,6 +1287,7 @@ var $ = class extends Y {
 				arpMode: this.arpMode,
 				arpRate: this.arpRate,
 				arpRange: this.arpRange,
+				arpGate: this.arpGate,
 				mode: this.mode,
 				humanSlider: this.humanSlider,
 				debugExpanded: this.debugExpanded
@@ -1233,7 +1310,8 @@ var $ = class extends Y {
 			bpm: this.bpm,
 			arpMode: this.arpMode,
 			arpRate: this.arpRate,
-			arpRange: this.arpRange
+			arpRange: this.arpRange,
+			arpGate: this.arpGate
 		};
 		this.dispatchEvent(new CustomEvent("human-change", {
 			detail: e,
@@ -1264,7 +1342,7 @@ var $ = class extends Y {
 		this.emitChange();
 	}
 	handleReset() {
-		this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.bpm = 80, this.arpMode = "off", this.arpRate = "1/16", this.arpRange = 1, this.mode = "advanced", this.humanSlider = .5, this.debugExpanded = !0, this.emitChange();
+		this.chordSequence = "Cmaj7 Dm7 G7 Cmaj", this.spread = .6, this.duration = 1, this.minVelocity = 60, this.maxVelocity = 110, this.humanVariance = .6, this.microTiming = .3, this.bpm = 80, this.arpMode = "off", this.arpRate = "1/16", this.arpRange = 1, this.arpGate = .85, this.mode = "advanced", this.humanSlider = .5, this.debugExpanded = !0, this.emitChange();
 	}
 	handleBpmChange(e) {
 		let t = e.target;
@@ -1294,7 +1372,8 @@ var $ = class extends Y {
 			bpm: this.bpm,
 			arpMode: this.arpMode,
 			arpRate: this.arpRate,
-			arpRange: this.arpRange
+			arpRange: this.arpRange,
+			arpGate: this.arpGate
 		};
 		this.dispatchEvent(new CustomEvent("human-preview", {
 			detail: e,
@@ -1312,21 +1391,92 @@ var $ = class extends Y {
 			composed: !0
 		}));
 	}
-	handleEmbeddedSliderChange(e, t) {
-		let n = t.target, r = parseFloat(n.value);
-		this[e] = r, this.dispatchEvent(new CustomEvent("parameter-override", {
+	handleEmbeddedSliderChange(e, t, n = !1) {
+		let r = t.target, i = n ? parseInt(r.value, 10) : parseFloat(r.value);
+		this[e] = i, e === "minVelocity" && this.minVelocity > this.maxVelocity ? this.maxVelocity = this.minVelocity : e === "maxVelocity" && this.maxVelocity < this.minVelocity && (this.minVelocity = this.maxVelocity), this.dispatchEvent(new CustomEvent("parameter-override", {
 			detail: {
 				param: e,
-				value: r
+				value: i
 			},
 			bubbles: !0,
 			composed: !0
 		})), this.emitChange();
 	}
-	renderEmbedded() {
+	handleEmbeddedSelectChange(e, t) {
+		let n = t.target.value;
+		this[e] = n, this.dispatchEvent(new CustomEvent("parameter-override", {
+			detail: {
+				param: e,
+				value: n
+			},
+			bubbles: !0,
+			composed: !0
+		})), this.emitChange();
+	}
+	renderEmbeddedSlider(e) {
+		let t = this.parameterOverrides && this.parameterOverrides[e.key] !== void 0, n = typeof this[e.key] == "number" ? this[e.key] : e.min, r = e.formatBadge ? e.formatBadge(n) : Number(n).toFixed(2), i = t ? "Set by hand" : `From ${this.sourceLabels[e.key] || e.label}`;
 		return R`
-      <div class="embedded-grid" part="grid">
-        ${[
+      <div class="embedded-param" part="param-row">
+        <div class="embedded-header">
+          <div class="embedded-label" part="param-label">${e.label}</div>
+          <button
+            type="button"
+            class="embedded-relink-btn ${t ? "" : "hidden"}"
+            part="relink-btn"
+            @click=${() => this.handleRelink(e.key)}
+            aria-label="Re-link ${e.label}"
+            tabindex=${t ? 0 : -1}
+          >Re-link</button>
+          <div class="embedded-badge" part="value-badge">${r}</div>
+        </div>
+        <input
+          type="range"
+          class="embedded-slider"
+          part="slider"
+          min=${e.min}
+          max=${e.max}
+          step=${e.step}
+          .value=${String(n)}
+          @input=${(t) => this.handleEmbeddedSliderChange(e.key, t, e.isInt)}
+          aria-label=${e.label}
+        />
+        <div class="embedded-source ${t ? "detached" : ""}" part="source-tag">${i}</div>
+      </div>
+    `;
+	}
+	renderEmbeddedSelect(e, t, n) {
+		let r = this.parameterOverrides && this.parameterOverrides[e] !== void 0, i = String(this[e] ?? n[0].value), a = n.find((e) => e.value === i), o = a ? a.label : i, s = r ? "Set by hand" : `From ${this.sourceLabels[e] || t}`;
+		return R`
+      <div class="embedded-param" part="param-row">
+        <div class="embedded-header">
+          <div class="embedded-label" part="param-label">${t}</div>
+          <button
+            type="button"
+            class="embedded-relink-btn ${r ? "" : "hidden"}"
+            part="relink-btn"
+            @click=${() => this.handleRelink(e)}
+            aria-label="Re-link ${t}"
+            tabindex=${r ? 0 : -1}
+          >Re-link</button>
+          <div class="embedded-badge" part="value-badge">${o}</div>
+        </div>
+        <select
+          class="embedded-select"
+          part="select"
+          .value=${i}
+          @change=${(t) => this.handleEmbeddedSelectChange(e, t)}
+          aria-label=${t}
+        >
+          ${n.map((e) => R`
+              <option value=${e.value} ?selected=${e.value === i}>${e.label}</option>
+            `)}
+        </select>
+        <div class="embedded-source ${r ? "detached" : ""}" part="source-tag">${s}</div>
+      </div>
+    `;
+	}
+	renderEmbedded() {
+		let e = [
 			{
 				key: "spread",
 				label: "Spread",
@@ -1355,37 +1505,119 @@ var $ = class extends Y {
 				max: 1,
 				step: .01
 			}
-		].map((e) => {
-			let t = this.parameterOverrides && this.parameterOverrides[e.key] !== void 0, n = typeof this[e.key] == "number" ? this[e.key] : e.min, r = Number(n).toFixed(2), i = t ? "Set by hand" : `From ${this.sourceLabels[e.key] || e.label}`;
-			return R`
-            <div class="embedded-param" part="param-row">
-              <div class="embedded-header">
-                <div class="embedded-label" part="param-label">${e.label}</div>
-                <button
-                  type="button"
-                  class="embedded-relink-btn ${t ? "" : "hidden"}"
-                  part="relink-btn"
-                  @click=${() => this.handleRelink(e.key)}
-                  aria-label="Re-link ${e.label} to the feel axis"
-                  tabindex=${t ? 0 : -1}
-                >Re-link</button>
-                <div class="embedded-badge" part="value-badge">${r}</div>
-              </div>
-              <input
-                type="range"
-                class="embedded-slider"
-                part="slider"
-                min=${e.min}
-                max=${e.max}
-                step=${e.step}
-                .value=${String(n)}
-                @input=${(t) => this.handleEmbeddedSliderChange(e.key, t)}
-                aria-label=${e.label}
-              />
-              <div class="embedded-source ${t ? "detached" : ""}" part="source-tag">${i}</div>
-            </div>
-          `;
+		], t = typeof this.minVelocity == "number" ? this.minVelocity : 60, n = typeof this.maxVelocity == "number" ? this.maxVelocity : 110, r = Math.min(127, Math.max(0, t)) / 127 * 100, i = Math.max(0, Math.min(127, n) - Math.min(127, Math.max(0, t))) / 127 * 100;
+		return R`
+      <div class="embedded-sections" part="sections">
+        <!-- Section: Timing & Touch -->
+        <div class="embedded-section" part="section-timing">
+          <div class="embedded-section-title">Timing & Touch</div>
+          <div class="embedded-grid" part="grid">
+            ${e.map((e) => this.renderEmbeddedSlider(e))}
+          </div>
+        </div>
+
+        <!-- Section: Arpeggio Engine -->
+        <div class="embedded-section" part="section-arp">
+          <div class="embedded-section-title">Arpeggio Engine</div>
+          <div class="embedded-grid" part="grid">
+            ${this.renderEmbeddedSelect("arpMode", "Arp Mode", [
+			{
+				value: "off",
+				label: "Off"
+			},
+			{
+				value: "up",
+				label: "Up"
+			},
+			{
+				value: "down",
+				label: "Down"
+			},
+			{
+				value: "up-down",
+				label: "Up-Down"
+			},
+			{
+				value: "random",
+				label: "Random"
+			}
+		])}
+            ${this.renderEmbeddedSelect("arpRate", "Rate / Division", [
+			{
+				value: "1/4",
+				label: "1/4"
+			},
+			{
+				value: "1/8",
+				label: "1/8"
+			},
+			{
+				value: "1/16",
+				label: "1/16"
+			},
+			{
+				value: "1/32",
+				label: "1/32"
+			},
+			{
+				value: "1/8T",
+				label: "1/8T (Triplet)"
+			},
+			{
+				value: "1/16T",
+				label: "1/16T (Triplet)"
+			}
+		])}
+            ${this.renderEmbeddedSlider({
+			key: "arpRange",
+			label: "Octave Range",
+			min: 1,
+			max: 3,
+			step: 1,
+			isInt: !0,
+			formatBadge: (e) => `${e} oct`
 		})}
+            ${this.renderEmbeddedSlider({
+			key: "arpGate",
+			label: "Gate Length",
+			min: .2,
+			max: 1.2,
+			step: .05,
+			formatBadge: (e) => `${Math.round(e * 100)}%`
+		})}
+          </div>
+        </div>
+
+        <!-- Section: Dynamics -->
+        <div class="embedded-section" part="section-dynamics">
+          <div class="embedded-section-title">Dynamics</div>
+          <div class="embedded-grid" part="grid">
+            ${this.renderEmbeddedSlider({
+			key: "minVelocity",
+			label: "Min Velocity",
+			min: 0,
+			max: 127,
+			step: 1,
+			isInt: !0,
+			formatBadge: (e) => `${Math.round(e)}`
+		})}
+            ${this.renderEmbeddedSlider({
+			key: "maxVelocity",
+			label: "Max Velocity",
+			min: 0,
+			max: 127,
+			step: 1,
+			isInt: !0,
+			formatBadge: (e) => `${Math.round(e)}`
+		})}
+          </div>
+          <div class="embedded-range-bar" title="Dynamic Velocity Range (${Math.round(t)} - ${Math.round(n)})">
+            <div
+              class="embedded-range-fill"
+              style="left: ${r}%; width: ${i}%;"
+            ></div>
+          </div>
+        </div>
       </div>
     `;
 	}
@@ -1724,7 +1956,9 @@ var $ = class extends Y {
                   <option value="1/4">1/4</option>
                   <option value="1/8">1/8</option>
                   <option value="1/16">1/16</option>
+                  <option value="1/32">1/32</option>
                   <option value="1/8T">1/8T (Triplet)</option>
+                  <option value="1/16T">1/16T (Triplet)</option>
                 </select>
                 ${this.showInfo ? R`
                   <div class="setting-explanation">Rhythmic speed / subdivision division of the arpeggio notes.</div>
@@ -1749,6 +1983,25 @@ var $ = class extends Y {
                   <div class="setting-explanation">The number of octaves the arpeggio pattern repeats across.</div>
                 ` : ""}
               </div>
+
+              <!-- Gate Length -->
+              <div class="control-row">
+                <div class="control-header">
+                  <label class="control-label">Gate Length (Note Duration)</label>
+                  <span class="control-value">${Math.round(this.arpGate * 100)}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0.2" max="1.5" step="0.05" 
+                  .value=${this.arpGate.toString()}
+                  @input=${(e) => this.handleNumberChange("arpGate", e)}
+                  ?disabled=${this.arpMode === "off"}
+                  aria-label="Arp Gate Length"
+                />
+                ${this.showInfo ? R`
+                  <div class="setting-explanation">Controls note length relative to the arp step interval (staccato vs sustained).</div>
+                ` : ""}
+              </div>
             </div>
           </div>
         `}
@@ -1771,6 +2024,9 @@ Q([Z({
 })], $.prototype, "arpRate", void 0), Q([Z({
 	type: Number,
 	attribute: "arp-range"
-})], $.prototype, "arpRange", void 0), Q([Z({ type: Boolean })], $.prototype, "debugExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "arpExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "showInfo", void 0), Q([Z({ type: String })], $.prototype, "mode", void 0), Q([Z({ type: Number })], $.prototype, "humanSlider", void 0), $ = Q([ge("human-panel")], $);
+})], $.prototype, "arpRange", void 0), Q([Z({
+	type: Number,
+	attribute: "arp-gate"
+})], $.prototype, "arpGate", void 0), Q([Z({ type: Boolean })], $.prototype, "debugExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "arpExpanded", void 0), Q([Z({ type: Boolean })], $.prototype, "showInfo", void 0), Q([Z({ type: String })], $.prototype, "mode", void 0), Q([Z({ type: Number })], $.prototype, "humanSlider", void 0), $ = Q([ge("human-panel")], $);
 //#endregion
 export { be as CHORD_CORES, xe as CHORD_MODIFIERS, $ as HumanPanel, ye as decodeProgression, ve as encodeProgression, Se as getChordSuffix };

@@ -17,6 +17,7 @@ export interface HumanState {
   arpMode: string;
   arpRate: string;
   arpRange: number;
+  arpGate?: number;
 }
 
 /**
@@ -155,6 +156,76 @@ export class HumanPanel extends LitElement {
 
     .embedded-source.detached {
       color: var(--hp-accent, #9E5D53);
+    }
+
+    .embedded-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .embedded-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .embedded-section-title {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--hp-text-secondary, rgba(46, 39, 31, 0.45));
+      margin: 0 0 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .embedded-select {
+      width: 100%;
+      margin-top: 7px;
+      background: var(--hp-surface-2, rgba(0, 0, 0, 0.05));
+      border: 1px solid var(--hp-border, rgba(46, 39, 31, 0.12));
+      color: var(--hp-text-primary, #2E271F);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239E5D53' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 12px;
+    }
+
+    .embedded-select:focus {
+      outline: none;
+      border-color: var(--hp-accent, #9E5D53);
+    }
+
+    .embedded-range-bar {
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--hp-surface-2, rgba(0, 0, 0, 0.08));
+      margin-top: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .embedded-range-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: var(--hp-accent, #9E5D53);
+      border-radius: 2px;
+      opacity: 0.8;
     }
 
     * {
@@ -567,7 +638,7 @@ export class HumanPanel extends LitElement {
    * Object indicating which parameters have manual host overrides.
    */
   @property({ type: Object })
-  parameterOverrides: Record<string, number> = {};
+  parameterOverrides: Record<string, any> = {};
 
   /**
    * Labels describing where non-overridden values derive from.
@@ -577,7 +648,13 @@ export class HumanPanel extends LitElement {
     spread: 'Spread',
     duration: 'Pattern + Density',
     humanVariance: 'Humanise',
-    microTiming: 'Swing + Humanise'
+    microTiming: 'Swing + Humanise',
+    arpMode: 'Pattern',
+    arpRate: 'Pattern',
+    arpRange: 'Pattern',
+    arpGate: 'Gate',
+    minVelocity: 'Genre',
+    maxVelocity: 'Genre',
   };
 
   /**
@@ -659,6 +736,12 @@ export class HumanPanel extends LitElement {
   arpRange = 1;
 
   /**
+   * Arpeggiator note gate length ratio (0.1 to 1.5, default 0.85).
+   */
+  @property({ type: Number, attribute: 'arp-gate' })
+  arpGate = 0.85;
+
+  /**
    * Whether the debug section is expanded.
    */
   @property({ type: Boolean })
@@ -711,6 +794,7 @@ export class HumanPanel extends LitElement {
         if (state.arpMode !== undefined) this.arpMode = state.arpMode;
         if (state.arpRate !== undefined) this.arpRate = state.arpRate;
         if (state.arpRange !== undefined) this.arpRange = state.arpRange;
+        if (state.arpGate !== undefined) this.arpGate = state.arpGate;
         if (state.mode !== undefined) this.mode = state.mode;
         if (state.humanSlider !== undefined) this.humanSlider = state.humanSlider;
         if (state.debugExpanded !== undefined) this.debugExpanded = state.debugExpanded;
@@ -734,6 +818,7 @@ export class HumanPanel extends LitElement {
         arpMode: this.arpMode,
         arpRate: this.arpRate,
         arpRange: this.arpRange,
+        arpGate: this.arpGate,
         mode: this.mode,
         humanSlider: this.humanSlider,
         debugExpanded: this.debugExpanded,
@@ -764,6 +849,7 @@ export class HumanPanel extends LitElement {
       arpMode: this.arpMode,
       arpRate: this.arpRate,
       arpRange: this.arpRange,
+      arpGate: this.arpGate,
     };
 
     this.dispatchEvent(
@@ -845,6 +931,7 @@ export class HumanPanel extends LitElement {
     this.arpMode = 'off';
     this.arpRate = '1/16';
     this.arpRange = 1;
+    this.arpGate = 0.85;
     this.mode = 'advanced';
     this.humanSlider = 0.5;
     this.debugExpanded = true;
@@ -892,6 +979,7 @@ export class HumanPanel extends LitElement {
       arpMode: this.arpMode,
       arpRate: this.arpRate,
       arpRange: this.arpRange,
+      arpGate: this.arpGate,
     };
 
     this.dispatchEvent(
@@ -921,9 +1009,28 @@ export class HumanPanel extends LitElement {
     );
   }
 
-  private handleEmbeddedSliderChange(param: keyof HumanState, e: Event) {
+  private handleEmbeddedSliderChange(param: keyof HumanState, e: Event, isInt = false) {
     const input = e.target as HTMLInputElement;
-    const value = parseFloat(input.value);
+    const value = isInt ? parseInt(input.value, 10) : parseFloat(input.value);
+    (this as any)[param] = value;
+    if (param === 'minVelocity' && this.minVelocity > this.maxVelocity) {
+      this.maxVelocity = this.minVelocity;
+    } else if (param === 'maxVelocity' && this.maxVelocity < this.minVelocity) {
+      this.minVelocity = this.maxVelocity;
+    }
+    this.dispatchEvent(
+      new CustomEvent('parameter-override', {
+        detail: { param, value },
+        bubbles: true,
+        composed: true,
+      })
+    );
+    this.emitChange();
+  }
+
+  private handleEmbeddedSelectChange(param: keyof HumanState, e: Event) {
+    const select = e.target as HTMLSelectElement;
+    const value = select.value;
     (this as any)[param] = value;
     this.dispatchEvent(
       new CustomEvent('parameter-override', {
@@ -935,51 +1042,185 @@ export class HumanPanel extends LitElement {
     this.emitChange();
   }
 
+  private renderEmbeddedSlider(p: {
+    key: keyof HumanState;
+    label: string;
+    min: number;
+    max: number;
+    step: number;
+    isInt?: boolean;
+    formatBadge?: (v: number) => string;
+  }) {
+    const detached = this.parameterOverrides && this.parameterOverrides[p.key] !== undefined;
+    const rawVal = typeof (this as any)[p.key] === 'number' ? (this as any)[p.key] : p.min;
+    const displayVal = p.formatBadge ? p.formatBadge(rawVal) : Number(rawVal).toFixed(2);
+    const fromText = detached ? 'Set by hand' : `From ${this.sourceLabels[p.key] || p.label}`;
+
+    return html`
+      <div class="embedded-param" part="param-row">
+        <div class="embedded-header">
+          <div class="embedded-label" part="param-label">${p.label}</div>
+          <button
+            type="button"
+            class="embedded-relink-btn ${detached ? '' : 'hidden'}"
+            part="relink-btn"
+            @click=${() => this.handleRelink(p.key as string)}
+            aria-label="Re-link ${p.label}"
+            tabindex=${detached ? 0 : -1}
+          >Re-link</button>
+          <div class="embedded-badge" part="value-badge">${displayVal}</div>
+        </div>
+        <input
+          type="range"
+          class="embedded-slider"
+          part="slider"
+          min=${p.min}
+          max=${p.max}
+          step=${p.step}
+          .value=${String(rawVal)}
+          @input=${(e: Event) => this.handleEmbeddedSliderChange(p.key, e, p.isInt)}
+          aria-label=${p.label}
+        />
+        <div class="embedded-source ${detached ? 'detached' : ''}" part="source-tag">${fromText}</div>
+      </div>
+    `;
+  }
+
+  private renderEmbeddedSelect(
+    key: keyof HumanState,
+    label: string,
+    options: { value: string; label: string }[]
+  ) {
+    const detached = this.parameterOverrides && this.parameterOverrides[key] !== undefined;
+    const val = String((this as any)[key] ?? options[0].value);
+    const selected = options.find(o => o.value === val);
+    const displayVal = selected ? selected.label : val;
+    const fromText = detached ? 'Set by hand' : `From ${this.sourceLabels[key] || label}`;
+
+    return html`
+      <div class="embedded-param" part="param-row">
+        <div class="embedded-header">
+          <div class="embedded-label" part="param-label">${label}</div>
+          <button
+            type="button"
+            class="embedded-relink-btn ${detached ? '' : 'hidden'}"
+            part="relink-btn"
+            @click=${() => this.handleRelink(key as string)}
+            aria-label="Re-link ${label}"
+            tabindex=${detached ? 0 : -1}
+          >Re-link</button>
+          <div class="embedded-badge" part="value-badge">${displayVal}</div>
+        </div>
+        <select
+          class="embedded-select"
+          part="select"
+          .value=${val}
+          @change=${(e: Event) => this.handleEmbeddedSelectChange(key, e)}
+          aria-label=${label}
+        >
+          ${options.map(
+            opt => html`
+              <option value=${opt.value} ?selected=${opt.value === val}>${opt.label}</option>
+            `
+          )}
+        </select>
+        <div class="embedded-source ${detached ? 'detached' : ''}" part="source-tag">${fromText}</div>
+      </div>
+    `;
+  }
+
   private renderEmbedded() {
-    const params: { key: keyof HumanState; label: string; min: number; max: number; step: number }[] = [
+    const timingParams: { key: keyof HumanState; label: string; min: number; max: number; step: number }[] = [
       { key: 'spread', label: 'Spread', min: 0, max: 1, step: 0.01 },
       { key: 'duration', label: 'Duration', min: 0.1, max: 2, step: 0.01 },
       { key: 'humanVariance', label: 'Human variance', min: 0, max: 1, step: 0.01 },
       { key: 'microTiming', label: 'Micro-timing', min: 0, max: 1, step: 0.01 },
     ];
 
-    return html`
-      <div class="embedded-grid" part="grid">
-        ${params.map(p => {
-          const detached = this.parameterOverrides && this.parameterOverrides[p.key] !== undefined;
-          const val = typeof (this as any)[p.key] === 'number' ? (this as any)[p.key] : p.min;
-          const displayVal = Number(val).toFixed(2);
-          const fromText = detached ? 'Set by hand' : `From ${this.sourceLabels[p.key] || p.label}`;
+    const minVel = typeof this.minVelocity === 'number' ? this.minVelocity : 60;
+    const maxVel = typeof this.maxVelocity === 'number' ? this.maxVelocity : 110;
+    const leftPct = (Math.min(127, Math.max(0, minVel)) / 127) * 100;
+    const widthPct = (Math.max(0, Math.min(127, maxVel) - Math.min(127, Math.max(0, minVel))) / 127) * 100;
 
-          return html`
-            <div class="embedded-param" part="param-row">
-              <div class="embedded-header">
-                <div class="embedded-label" part="param-label">${p.label}</div>
-                <button
-                  type="button"
-                  class="embedded-relink-btn ${detached ? '' : 'hidden'}"
-                  part="relink-btn"
-                  @click=${() => this.handleRelink(p.key as string)}
-                  aria-label="Re-link ${p.label} to the feel axis"
-                  tabindex=${detached ? 0 : -1}
-                >Re-link</button>
-                <div class="embedded-badge" part="value-badge">${displayVal}</div>
-              </div>
-              <input
-                type="range"
-                class="embedded-slider"
-                part="slider"
-                min=${p.min}
-                max=${p.max}
-                step=${p.step}
-                .value=${String(val)}
-                @input=${(e: Event) => this.handleEmbeddedSliderChange(p.key, e)}
-                aria-label=${p.label}
-              />
-              <div class="embedded-source ${detached ? 'detached' : ''}" part="source-tag">${fromText}</div>
-            </div>
-          `;
-        })}
+    return html`
+      <div class="embedded-sections" part="sections">
+        <!-- Section: Timing & Touch -->
+        <div class="embedded-section" part="section-timing">
+          <div class="embedded-section-title">Timing & Touch</div>
+          <div class="embedded-grid" part="grid">
+            ${timingParams.map(p => this.renderEmbeddedSlider(p))}
+          </div>
+        </div>
+
+        <!-- Section: Arpeggio Engine -->
+        <div class="embedded-section" part="section-arp">
+          <div class="embedded-section-title">Arpeggio Engine</div>
+          <div class="embedded-grid" part="grid">
+            ${this.renderEmbeddedSelect('arpMode', 'Arp Mode', [
+              { value: 'off', label: 'Off' },
+              { value: 'up', label: 'Up' },
+              { value: 'down', label: 'Down' },
+              { value: 'up-down', label: 'Up-Down' },
+              { value: 'random', label: 'Random' },
+            ])}
+            ${this.renderEmbeddedSelect('arpRate', 'Rate / Division', [
+              { value: '1/4', label: '1/4' },
+              { value: '1/8', label: '1/8' },
+              { value: '1/16', label: '1/16' },
+              { value: '1/32', label: '1/32' },
+              { value: '1/8T', label: '1/8T (Triplet)' },
+              { value: '1/16T', label: '1/16T (Triplet)' },
+            ])}
+            ${this.renderEmbeddedSlider({
+              key: 'arpRange',
+              label: 'Octave Range',
+              min: 1,
+              max: 3,
+              step: 1,
+              isInt: true,
+              formatBadge: v => `${v} oct`,
+            })}
+            ${this.renderEmbeddedSlider({
+              key: 'arpGate',
+              label: 'Gate Length',
+              min: 0.2,
+              max: 1.2,
+              step: 0.05,
+              formatBadge: v => `${Math.round(v * 100)}%`,
+            })}
+          </div>
+        </div>
+
+        <!-- Section: Dynamics -->
+        <div class="embedded-section" part="section-dynamics">
+          <div class="embedded-section-title">Dynamics</div>
+          <div class="embedded-grid" part="grid">
+            ${this.renderEmbeddedSlider({
+              key: 'minVelocity',
+              label: 'Min Velocity',
+              min: 0,
+              max: 127,
+              step: 1,
+              isInt: true,
+              formatBadge: v => `${Math.round(v)}`,
+            })}
+            ${this.renderEmbeddedSlider({
+              key: 'maxVelocity',
+              label: 'Max Velocity',
+              min: 0,
+              max: 127,
+              step: 1,
+              isInt: true,
+              formatBadge: v => `${Math.round(v)}`,
+            })}
+          </div>
+          <div class="embedded-range-bar" title="Dynamic Velocity Range (${Math.round(minVel)} - ${Math.round(maxVel)})">
+            <div
+              class="embedded-range-fill"
+              style="left: ${leftPct}%; width: ${widthPct}%;"
+            ></div>
+          </div>
+        </div>
       </div>
     `;
   }
@@ -1319,7 +1560,9 @@ export class HumanPanel extends LitElement {
                   <option value="1/4">1/4</option>
                   <option value="1/8">1/8</option>
                   <option value="1/16">1/16</option>
+                  <option value="1/32">1/32</option>
                   <option value="1/8T">1/8T (Triplet)</option>
+                  <option value="1/16T">1/16T (Triplet)</option>
                 </select>
                 ${this.showInfo ? html`
                   <div class="setting-explanation">Rhythmic speed / subdivision division of the arpeggio notes.</div>
@@ -1342,6 +1585,25 @@ export class HumanPanel extends LitElement {
                 />
                 ${this.showInfo ? html`
                   <div class="setting-explanation">The number of octaves the arpeggio pattern repeats across.</div>
+                ` : ''}
+              </div>
+
+              <!-- Gate Length -->
+              <div class="control-row">
+                <div class="control-header">
+                  <label class="control-label">Gate Length (Note Duration)</label>
+                  <span class="control-value">${Math.round(this.arpGate * 100)}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0.2" max="1.5" step="0.05" 
+                  .value=${this.arpGate.toString()}
+                  @input=${(e: Event) => this.handleNumberChange('arpGate', e)}
+                  ?disabled=${this.arpMode === 'off'}
+                  aria-label="Arp Gate Length"
+                />
+                ${this.showInfo ? html`
+                  <div class="setting-explanation">Controls note length relative to the arp step interval (staccato vs sustained).</div>
                 ` : ''}
               </div>
             </div>

@@ -15,6 +15,7 @@ export interface HumanState {
     arpMode: string;
     arpRate: string;
     arpRange: number;
+    arpGate?: number;
 }
 /**
  * <human-panel>
@@ -33,7 +34,7 @@ export declare class HumanPanel extends LitElement {
     /**
      * Object indicating which parameters have manual host overrides.
      */
-    parameterOverrides: Record<string, number>;
+    parameterOverrides: Record<string, any>;
     /**
      * Labels describing where non-overridden values derive from.
      */
@@ -91,6 +92,10 @@ export declare class HumanPanel extends LitElement {
      */
     arpRange: number;
     /**
+     * Arpeggiator note gate length ratio (0.1 to 1.5, default 0.85).
+     */
+    arpGate: number;
+    /**
      * Whether the debug section is expanded.
      */
     debugExpanded: boolean;
@@ -146,6 +151,9 @@ export declare class HumanPanel extends LitElement {
     private toggleDebug;
     private handleRelink;
     private handleEmbeddedSliderChange;
+    private handleEmbeddedSelectChange;
+    private renderEmbeddedSlider;
+    private renderEmbeddedSelect;
     private renderEmbedded;
     render(): import('lit-html').TemplateResult<1>;
 }
